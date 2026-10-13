@@ -1,0 +1,2823 @@
+<!--
+  Copyright © 2026 - N.L.Thutina Deshan. All rights reserved.
+  This file and its contents may not be copied, reproduced, or distributed without permission.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="author" content="N.L.Thutina Deshan">
+<meta name="copyright" content="Copyright © 2026 - N.L.Thutina Deshan. All rights reserved. This file and its contents may not be copied, reproduced, or distributed without permission.">
+<title>Shipment Dispatch Verification System</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+  :root{
+    --blue:#005EB8; --blue-dark:#00427F; --blue-deep:#00335f;
+    --green:#78BE20; --green-dark:#5a9418;
+    --success:#2E7D32; --success-light:#e6f4e6;
+    --danger:#D32F2F; --danger-light:#fbe9e8;
+    --yellow:#F2A900; --yellow-text:#7a5600; --yellow-light:#fff4de;
+
+    --ink:#1F2933; --muted:#5b6b78;
+    --bg:#FFFFFF; --bg-soft:#F3F5F7; --bg-blue:#EAF4FB;
+
+    --border:rgba(31,41,51,0.10);
+    --glass:rgba(255,255,255,0.62);
+    --glass-strong:rgba(255,255,255,0.82);
+    --glass-border:rgba(0,94,184,0.14);
+    --glass-border-soft:rgba(31,41,51,0.08);
+    --shadow-lift:0 10px 26px rgba(15,45,80,0.10);
+    --blue-glow:0 0 0 1px rgba(0,94,184,0.28), 0 6px 20px rgba(0,94,184,0.20);
+  }
+  *{box-sizing:border-box;}
+
+  body{
+    font-family:'Inter',-apple-system,'Segoe UI',Arial,sans-serif;
+    margin:0; padding:28px; color:var(--ink);
+    background:
+      radial-gradient(1100px 700px at 6% -10%, rgba(0,94,184,0.12), transparent 60%),
+      radial-gradient(900px 650px at 105% 6%, rgba(120,190,32,0.12), transparent 55%),
+      radial-gradient(1000px 800px at 50% 118%, rgba(0,94,184,0.08), transparent 60%),
+      linear-gradient(160deg, #ffffff 0%, #f6f9fc 45%, #eef4f9 100%);
+    background-attachment:fixed;
+    min-height:100vh;
+    position:relative;
+  }
+  body::before{
+    content:''; position:fixed; inset:0; z-index:-1; pointer-events:none;
+    background-image:radial-gradient(circle at 1px 1px, rgba(0,94,184,0.05) 1px, transparent 0);
+    background-size:26px 26px;
+    opacity:0.5;
+  }
+
+  h1{
+    font-family:'Inter',sans-serif; font-size:28px; margin:0; font-weight:800;
+    color:var(--blue-dark); letter-spacing:.2px; line-height:1.2;
+  }
+  .app-subtitle{
+    font-family:'Inter',sans-serif; font-size:13px; font-weight:700; letter-spacing:1.5px;
+    color:var(--blue); text-transform:uppercase; margin:4px 0 0 0;
+  }
+  .subtitle{color:var(--muted); margin:0 0 20px 0; font-size:13px;}
+  .header-row{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; margin-bottom:24px;}
+  .ansell-logo{
+    font-family:'Inter',sans-serif; font-weight:800; font-size:19px; letter-spacing:3px;
+    color:#fff;
+    background:linear-gradient(135deg, var(--blue), var(--blue-dark));
+    padding:9px 20px; border-radius:10px; line-height:1;
+    box-shadow: var(--blue-glow), inset 0 1px 0 rgba(255,255,255,0.35);
+    border:1px solid rgba(255,255,255,0.25);
+  }
+  .mid-header{text-align:center; margin:40px 0 26px 0; padding-top:26px; border-top:1px solid var(--glass-border-soft);}
+  .mid-header h1{font-size:21px;}
+  .mid-header .app-subtitle{font-size:11.5px;}
+
+  .grid{display:grid; grid-template-columns:1fr 1fr; gap:22px;}
+  @media (max-width:980px){.grid{grid-template-columns:1fr;}}
+
+  .card{
+    background:var(--glass);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    backdrop-filter: blur(20px) saturate(160%);
+    border:1px solid var(--glass-border);
+    border-radius:18px;
+    padding:20px 22px; margin-bottom:22px;
+    box-shadow: var(--shadow-lift), inset 0 1px 0 rgba(255,255,255,0.6);
+    position:relative;
+  }
+  .card::before{
+    content:''; position:absolute; inset:0; border-radius:18px; pointer-events:none;
+    background:linear-gradient(160deg, rgba(255,255,255,0.5), transparent 40%);
+  }
+  .card h2{
+    font-size:13px; margin:0 0 16px 0; color:var(--blue-dark); font-weight:700;
+    display:flex; align-items:center; gap:10px; letter-spacing:.3px;
+    text-transform:uppercase;
+  }
+  .badge{
+    background:linear-gradient(135deg, var(--blue), var(--blue-dark)); color:#fff; font-size:11px;
+    padding:3px 10px; border-radius:20px; font-weight:700;
+    box-shadow:0 2px 10px rgba(0,94,184,0.3);
+  }
+
+  label{font-size:11px; color:var(--muted); display:block; margin-bottom:6px; font-weight:700; text-transform:uppercase; letter-spacing:.6px;}
+
+  input[type=text], input[type=number], input[type=date]{
+    width:100%; height:40px; padding:9px 12px;
+    border:1px solid var(--glass-border);
+    border-radius:10px; font-size:13px; font-family:inherit;
+    background:rgba(255,255,255,0.7);
+    color:var(--ink);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    transition:border-color .2s ease, box-shadow .2s ease, background .2s ease;
+  }
+  input[type=text]::placeholder, input[type=number]::placeholder, input[type=date]::placeholder{color:rgba(31,41,51,0.35);}
+  input[type=text]:focus, input[type=number]:focus, input[type=date]:focus{
+    outline:none; border-color:var(--blue);
+    box-shadow:0 0 0 3px rgba(0,94,184,0.18);
+    background:rgba(255,255,255,0.92);
+  }
+  input:disabled{background:rgba(31,41,51,0.04); color:rgba(31,41,51,0.35); cursor:not-allowed; border-color:var(--glass-border-soft);}
+
+  .field{margin-bottom:13px;}
+  .shipment-grid{display:grid; grid-template-columns:repeat(5, 1fr); gap:14px; align-items:start;}
+  @media (max-width:980px){.shipment-grid{grid-template-columns:repeat(2, 1fr);}}
+  @media (max-width:500px){.shipment-grid{grid-template-columns:1fr;}}
+  .row-inline{display:grid; grid-template-columns:repeat(4,1fr) auto; gap:10px; align-items:end;}
+  @media (max-width:820px){.row-inline{grid-template-columns:1fr 1fr;}}
+
+  button{
+    background:linear-gradient(135deg, #1c7fe0, var(--blue) 60%, var(--blue-dark));
+    color:#fff; border:1px solid rgba(255,255,255,0.3);
+    padding:10px 18px; border-radius:11px;
+    font-size:13px; font-weight:700; cursor:pointer; white-space:nowrap;
+    box-shadow: var(--blue-glow), inset 0 1px 0 rgba(255,255,255,0.3);
+    transition:transform .18s ease, box-shadow .18s ease, filter .18s ease;
+    letter-spacing:.2px;
+  }
+  button:hover{transform:translateY(-2px); filter:brightness(1.05); box-shadow:0 0 0 1px rgba(0,94,184,0.45), 0 10px 26px rgba(0,94,184,0.3);}
+  button:active{transform:translateY(0);}
+  button:disabled{background:rgba(31,41,51,0.10); color:rgba(31,41,51,0.35); box-shadow:none; border-color:var(--glass-border-soft); cursor:not-allowed; transform:none;}
+  button.secondary{
+    background:rgba(31,41,51,0.06); color:var(--ink); border:1px solid var(--glass-border-soft);
+    box-shadow: var(--shadow-lift), inset 0 1px 0 rgba(255,255,255,0.5);
+    -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  }
+  button.secondary:hover{background:rgba(31,41,51,0.11); box-shadow:0 10px 22px rgba(15,45,80,0.14);}
+  button.danger{
+    background:linear-gradient(135deg, #e35b56, var(--danger) 60%, #a4241f);
+    color:#fff; padding:6px 12px; font-size:12px;
+    box-shadow:0 4px 14px rgba(211,47,47,0.32), inset 0 1px 0 rgba(255,255,255,0.3);
+    border:1px solid rgba(255,255,255,0.25);
+  }
+  button.small{padding:6px 12px; font-size:12px;}
+  button.success{
+    background:linear-gradient(135deg, #8fd23c, var(--green) 60%, var(--green-dark));
+    color:#12330a; border:1px solid rgba(255,255,255,0.35);
+    box-shadow:0 4px 14px rgba(120,190,32,0.32), inset 0 1px 0 rgba(255,255,255,0.45);
+  }
+  .btn-row{display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;}
+
+  /* ---- Auto-save / session-recovery bar ---- */
+  .session-bar{
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    border-radius:14px; padding:11px 16px; margin-bottom:16px; font-size:12.5px;
+    -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);
+    background:var(--success-light); border:1px solid rgba(46,125,50,0.28); border-left:5px solid var(--green); color:#1e6b2e;
+  }
+  .session-bar .session-msg{flex:1; min-width:240px; font-weight:600;}
+  #autosaveDot{display:inline-block; width:9px; height:9px; border-radius:50%; background:var(--success); margin-right:7px; vertical-align:middle;}
+  #autosaveDot.saving{background:var(--yellow);} #autosaveDot.failed{background:var(--danger);}
+  .session-bar.warn{background:var(--yellow-light); border-color:rgba(242,169,0,0.35); border-left-color:var(--yellow); color:var(--yellow-text);}
+  .session-bar.danger{background:var(--danger-light); border-color:rgba(211,47,47,0.3); border-left-color:var(--danger); color:#842029;}
+
+  /* ---- Previous-session recovery dialog ---- */
+  .modal-overlay{
+    display:none; position:fixed; inset:0; z-index:9999;
+    background:rgba(10,25,40,0.55); -webkit-backdrop-filter:blur(3px); backdrop-filter:blur(3px);
+    align-items:center; justify-content:center; padding:20px;
+  }
+  .modal-overlay.show{display:flex;}
+  .modal-box{
+    background:#fff; border-radius:18px; width:100%; max-width:880px; max-height:90vh;
+    display:flex; flex-direction:column; overflow:hidden;
+    box-shadow:0 22px 60px rgba(10,30,60,0.38); border:1px solid var(--border);
+  }
+  .modal-head{padding:20px 24px 14px 24px; border-bottom:1px solid var(--border);}
+  .modal-head h3{margin:0 0 5px 0; font-size:18px; color:var(--blue-dark); font-weight:800;}
+  .modal-head p{margin:0; font-size:12.5px; color:var(--muted);}
+  .modal-body{padding:16px 24px; overflow-y:auto;}
+  .modal-foot{
+    padding:14px 24px; border-top:1px solid var(--border); background:var(--bg-soft);
+    display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end;
+  }
+  .modal-foot button{padding:10px 18px; font-size:13px;}
+  .recover-info{
+    background:var(--bg-blue); border:1px solid rgba(0,94,184,0.2); border-radius:12px;
+    padding:12px 15px; font-size:13px; color:var(--blue-dark); margin-bottom:14px; line-height:1.7;
+  }
+  .recover-chips{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px;}
+  .recover-chip{background:var(--bg-soft); border:1px solid var(--border); border-radius:12px; padding:9px 16px; min-width:118px;}
+  .recover-chip .num{font-size:19px; font-weight:800; color:var(--blue-dark);}
+  .recover-chip .lbl{font-size:10.5px; color:var(--muted); text-transform:uppercase; letter-spacing:.4px;}
+  #recoverScanWrap{max-height:270px; overflow-y:auto; border:1px solid var(--border); border-radius:12px;}
+  #recoverScanWrap table{font-size:12.5px;}
+
+  table{width:100%; border-collapse:separate; border-spacing:0; font-size:13px;}
+  th, td{padding:9px 11px; text-align:left; border-bottom:1px solid var(--glass-border-soft);}
+  th{
+    background:linear-gradient(135deg, rgba(0,94,184,0.14), rgba(0,94,184,0.03));
+    -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+    font-size:11px; text-transform:uppercase; letter-spacing:.6px; color:var(--blue-dark);
+    font-weight:700; position:sticky; top:0; z-index:1;
+    border-bottom:1px solid rgba(0,94,184,0.25);
+  }
+  td{color:var(--ink); border-right:1px solid transparent;}
+  tbody tr{transition:background .15s ease;}
+  tbody tr:nth-child(even){background:rgba(31,41,51,0.02);}
+  tbody tr:hover{background:rgba(0,94,184,0.06);}
+  .table-wrap{
+    max-height:280px; overflow-y:auto; border-radius:12px;
+    border:1px solid var(--glass-border); background:rgba(255,255,255,0.35);
+  }
+  .table-wrap::-webkit-scrollbar{width:9px; height:9px;}
+  .table-wrap::-webkit-scrollbar-thumb{background:rgba(0,94,184,0.35); border-radius:10px;}
+  .table-wrap::-webkit-scrollbar-track{background:transparent;}
+
+  .row-green{background:rgba(46,125,50,0.12) !important; color:#1e5622; font-weight:700; box-shadow:inset 3px 0 0 var(--success);}
+  .row-yellow{background:rgba(242,169,0,0.16) !important; color:#7a5600; font-weight:700; box-shadow:inset 3px 0 0 var(--yellow);}
+  .row-red{background:rgba(211,47,47,0.12) !important; color:#8c2320; font-weight:700; box-shadow:inset 3px 0 0 var(--danger);}
+  .status-pill{padding:3px 11px; border-radius:20px; font-size:11px; font-weight:700; letter-spacing:.2px;}
+  .pill-green{background:linear-gradient(135deg,#4c9a2a,var(--success)); color:#fff; box-shadow:0 2px 10px rgba(46,125,50,0.35);}
+  .pill-yellow{background:linear-gradient(135deg,#ffc23d,var(--yellow)); color:#241900; box-shadow:0 2px 10px rgba(242,169,0,0.35);}
+  .pill-red{background:linear-gradient(135deg,#e35b56,var(--danger)); color:#fff; box-shadow:0 2px 10px rgba(211,47,47,0.35);}
+  .scan-row-alert{color:#a4241f !important; font-weight:700;}
+
+  .scan-station{background:var(--bg-blue); border:1px solid rgba(0,94,184,0.25);}
+  .scan-status{font-size:13px; padding:11px 14px; border-radius:12px; margin-bottom:14px; font-weight:700; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);}
+  .stage-item{background:rgba(0,94,184,0.12); color:var(--blue-dark); border:1px solid rgba(0,94,184,0.3);}
+  .stage-lot{background:rgba(120,190,32,0.16); color:#3f6b14; border:1px solid rgba(120,190,32,0.4);}
+  .not-found{border-color:var(--yellow) !important; background:rgba(242,169,0,0.12) !important;}
+
+  .totals-bar{display:flex; gap:18px; flex-wrap:wrap; margin-top:16px; padding-top:16px; border-top:1px solid var(--glass-border-soft);}
+  .stat{
+    background:rgba(255,255,255,0.6); border:1px solid var(--glass-border); border-radius:12px;
+    padding:12px 18px; min-width:150px; -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  }
+  .stat .num{font-size:22px; font-weight:800; color:var(--blue-dark);}
+  .stat .lbl{font-size:10.5px; color:var(--muted); text-transform:uppercase; letter-spacing:.5px;}
+
+  .scan-report-top{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; margin-bottom:18px;}
+  .scan-report-stats{display:flex; gap:10px; flex-wrap:wrap;}
+  .stat.mini{min-width:130px; padding:8px 16px;}
+  .stat.mini .num{font-size:18px;}
+
+  textarea{
+    width:100%; min-height:80px; border:1px solid var(--glass-border); border-radius:10px;
+    padding:10px; font-family:'Inter',monospace; font-size:12.5px;
+    background:rgba(255,255,255,0.7); color:var(--ink);
+    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  }
+  textarea:focus{outline:none; border-color:var(--blue); box-shadow:0 0 0 3px rgba(0,94,184,0.16);}
+
+  .hint{font-size:11.5px; color:var(--muted); margin-top:5px;}
+  .toggle-link{color:var(--blue); font-size:12.5px; cursor:pointer; text-decoration:underline; font-weight:600;}
+  .empty-msg{color:var(--muted); font-size:13px; padding:16px; text-align:center;}
+  .footer-note{font-size:11.5px; color:var(--muted); margin-top:26px; text-align:center;}
+
+  .filter-btn{
+    background:rgba(255,255,255,0.5); color:var(--muted); border:1px solid var(--glass-border);
+    padding:8px 16px; border-radius:24px; font-size:12.5px; font-weight:700; cursor:pointer;
+    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+    transition:all .18s ease;
+  }
+  .filter-btn:hover{background:rgba(255,255,255,0.8); color:var(--ink);}
+  .filter-btn.active{background:linear-gradient(135deg,#1c7fe0,var(--blue)); color:#fff; border-color:transparent; box-shadow:var(--blue-glow);}
+  .filter-btn.active.filter-exceed{background:linear-gradient(135deg,#e35b56,var(--danger)); color:#fff; box-shadow:0 0 0 1px rgba(211,47,47,.4), 0 6px 18px rgba(211,47,47,.3);}
+  .filter-btn.active.filter-met{background:linear-gradient(135deg,#4c9a2a,var(--success)); color:#fff; box-shadow:0 0 0 1px rgba(46,125,50,.4), 0 6px 18px rgba(46,125,50,.3);}
+  .filter-btn.active.filter-pending{background:linear-gradient(135deg,#ffc23d,var(--yellow)); color:#241900; box-shadow:0 0 0 1px rgba(242,169,0,.4), 0 6px 18px rgba(242,169,0,.3);}
+
+  #scanItem, #qrItemInput, #manualItem{text-transform:uppercase;}
+  .tally-info{
+    font-size:13px; padding:10px 14px; border-radius:12px; margin-bottom:12px; font-weight:700;
+    background:rgba(0,94,184,0.10); border:1px solid rgba(0,94,184,0.3); color:var(--blue-dark);
+    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  }
+  .tally-info.tally-exceed{background:rgba(211,47,47,0.12); border-color:var(--danger); color:#8c2320;}
+  .exceed-alert{
+    font-size:13.5px; padding:13px 15px; border-radius:12px; margin-bottom:12px; font-weight:800;
+    background:rgba(211,47,47,0.12); border:2px solid var(--danger); color:#8c2320;
+    box-shadow:0 6px 18px rgba(211,47,47,0.18);
+  }
+  .row-extra{background:rgba(0,94,184,0.10) !important; color:var(--blue-dark); font-weight:700; box-shadow:inset 3px 0 0 var(--blue);}
+  .pill-extra{background:linear-gradient(135deg,#1c7fe0,var(--blue)); color:#fff; box-shadow:0 2px 10px rgba(0,94,184,0.35);}
+  .field-error{border-color:var(--danger) !important; background-color:rgba(211,47,47,0.10) !important;}
+  #scanBarcode, #qrItemInput, #qrLotInput{user-select:none; -webkit-user-select:none; -ms-user-select:none;}
+
+  .l10-dialog{background:#fff; border-radius:16px; padding:22px 24px; max-width:820px; width:100%; max-height:88vh; overflow:auto; box-shadow:0 20px 50px rgba(15,45,80,0.3);}
+  #l10Toast{position:fixed; bottom:22px; left:50%; transform:translateX(-50%); background:var(--blue-dark); color:#fff; padding:10px 18px; border-radius:10px; font-size:13px; z-index:10100; display:none;}
+  #tabConflictBar{display:none; background:var(--yellow-light); color:var(--yellow-text); border:1px solid var(--yellow); border-radius:10px; padding:9px 14px; margin-bottom:14px; font-size:13px; font-weight:600;}
+
+  /* ---------- LOADING COMPLETE MODAL ---------- */
+  .lc-modal{
+    position:fixed; inset:0; background:rgba(15,25,35,0.35);
+    -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+    display:flex; align-items:center; justify-content:center; z-index:9999; padding:16px;
+  }
+  .lc-modal-content{
+    background:rgba(255,255,255,0.78);
+    -webkit-backdrop-filter: blur(22px) saturate(160%); backdrop-filter: blur(22px) saturate(160%);
+    border:1px solid rgba(46,125,50,0.4); border-radius:18px;
+    padding:28px 30px 24px; text-align:center; max-width:460px; width:100%;
+    box-shadow:0 20px 50px rgba(15,45,80,0.22), 0 0 0 1px rgba(46,125,50,0.1);
+  }
+  .lc-message{font-size:18px; font-weight:800; color:var(--success); margin:4px 0 18px 0;}
+  .lc-scene{
+    position:relative; height:100px; overflow:hidden; margin-bottom:18px; border-radius:12px;
+    background:linear-gradient(to bottom, rgba(0,94,184,0.16) 0%, rgba(0,94,184,0.16) 62%, rgba(0,94,184,0.32) 62%, rgba(0,94,184,0.32) 100%);
+    border:1px solid var(--glass-border);
+  }
+  .lc-box, .lc-truck, .lc-ship{position:absolute; bottom:14px; font-size:30px; line-height:1;}
+  .lc-box{left:14px; bottom:44px; font-size:24px;}
+  .lc-truck{left:-15%;}
+  .lc-ship{left:-15%; opacity:0;}
+  .lc-waves{
+    position:absolute; left:0; right:0; bottom:2px; text-align:center; font-size:13px;
+    letter-spacing:3px; color:var(--blue-dark); opacity:0.6;
+  }
+  .lc-modal-content.lc-playing .lc-box{animation:lcBoxLoad 10s ease-in-out both;}
+  .lc-modal-content.lc-playing .lc-truck{animation:lcTruckMove 10s ease-in-out both;}
+  .lc-modal-content.lc-playing .lc-ship{animation:lcShipMove 10s ease-in-out both;}
+  @keyframes lcBoxLoad{
+    0%{transform:translate(0,0) scale(1); opacity:1;}
+    10%{transform:translate(4px,-6px) scale(1.05); opacity:1;}
+    18%{transform:translate(10px,2px) scale(0.9); opacity:0;}
+    100%{opacity:0;}
+  }
+  @keyframes lcTruckMove{
+    0%{left:-15%; opacity:0;}
+    8%{opacity:1;}
+    18%{left:10%; opacity:1;}
+    62%{left:68%; opacity:1;}
+    70%{opacity:1;}
+    78%{opacity:0;}
+    100%{left:68%; opacity:0;}
+  }
+  @keyframes lcShipMove{
+    0%{left:55%; opacity:0;}
+    65%{left:55%; opacity:0;}
+    75%{left:62%; opacity:1;}
+    100%{left:118%; opacity:1;}
+  }
+</style>
+</head>
+<body>
+
+<div id="tabConflictBar">⚠️ This app is open in another tab/window too. Both tabs write to the same saved session - the last one to save wins. Close the extra tab to avoid losing scans.</div>
+<div class="header-row">
+  <div>
+    <h1>Shipment Dispatch Verification System</h1>
+    <p class="app-subtitle">ANSELL TEXTILES LANKA PVT LTD</p>
+  </div>
+  <div class="ansell-logo">ANSELL</div>
+</div>
+
+<!-- SHIPMENT DETAILS -->
+<div class="card" style="background:#eef5ff; border:1px solid #bcd6f5;">
+  <h2>Shipment Details <span style="color:var(--danger); font-size:12px; margin-left:8px;">* Required before performing any action</span></h2>
+  <div class="shipment-grid">
+    <div class="field"><label>Load ID *</label><input type="text" id="loadId" placeholder="e.g. LL00000XXXX"></div>
+    <div class="field"><label>Destination *</label><input type="text" id="destination" placeholder="e.g. Colombo Fort"></div>
+    <div class="field"><label>Loading Date *</label><input type="date" id="loadingDate"></div>
+    <div class="field"><label>User Name *</label><input type="text" id="userName" placeholder="e.g. Deshan"></div>
+    <div class="field"><label>Employee Number *</label><input type="text" id="employeeNumber" placeholder="e.g. EMP-1042"></div>
+  </div>
+  <div class="field" style="margin-top:4px;">
+    <label>Shipment Type *</label>
+    <div class="btn-row" style="margin-top:2px;">
+      <label style="display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:13px;color:#1c2733;">
+        <input type="radio" name="shipmentType" id="shipmentTypeAnsell" value="ansell"> Ansell Lanka
+      </label>
+      <label style="display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:13px;color:#1c2733;">
+        <input type="radio" name="shipmentType" id="shipmentTypeExport" value="export"> Export Shipment
+      </label>
+    </div>
+  </div>
+  <div class="hint">⚠️ All fields above must be filled out, and a Shipment Type selected, before scanning or editing lists.</div>
+  <div class="btn-row" style="margin-top:10px;">
+    <button class="danger small" id="btnResetShipment" onclick="resetShipmentDetails()">♻ Reset Shipment Details</button>
+  </div>
+  <div id="shipmentBanner" style="margin-top:10px; font-weight:700; color:var(--danger); font-size:14px;">🔒 Action Locked: Fill in all shipment details to begin.</div>
+</div>
+
+<!-- AUTO-SAVE / SESSION RECOVERY BAR -->
+<div class="session-bar" id="sessionBar">
+  <div class="session-msg" id="sessionMsg"><span id="autosaveDot"></span>Auto-save is on. Scanned data is kept in this browser even if it is closed.</div>
+  <button class="small" id="btnPrevShipments" onclick="openArchiveDialog()">📂 Previous Shipments (0)</button>
+  <button class="small success" id="btnRestoreHeld" style="display:none" onclick="restoreHeldSession()">↩ Load Previous Scanned List</button>
+  <button class="danger small" onclick="startNewShipment()">🗑 Start New Shipment</button>
+</div>
+
+<!-- PREVIOUS SESSION RECOVERY DIALOG -->
+<div class="modal-overlay" id="recoverOverlay">
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="recoverTitle">
+    <div class="modal-head">
+      <h3 id="recoverTitle">📋 A previous scanning session was found</h3>
+      <p>This browser still holds the data from the last time the app was used - it was saved automatically. Check the list below and choose whether to load it or start fresh.</p>
+    </div>
+    <div class="modal-body">
+      <div class="recover-info" id="recoverInfo"></div>
+      <div class="recover-chips" id="recoverChips"></div>
+      <div style="font-size:12.5px; font-weight:700; color:var(--muted); margin-bottom:6px;" id="recoverListLabel">Previously scanned list</div>
+      <div id="recoverScanWrap">
+        <table>
+          <thead><tr><th>#</th><th>Item Number</th><th>Product Name</th><th>Lot Number</th><th>Remarks</th><th>Time</th></tr></thead>
+          <tbody id="recoverScanBody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="secondary" onclick="cancelRestorePrompt()">✖ Cancel - Start Fresh</button>
+      <button class="success" onclick="confirmRestorePrompt()">✅ Load Previous Data</button>
+    </div>
+  </div>
+</div>
+
+<!-- MASTER SUMMARY DATA -->
+<div class="card">
+  <h2>1. Summary List (Item Number, Product Name &amp; <span id="lblMasterHeadingQty">Required Box Qty</span>) <span class="badge" id="masterCount">0 rows</span><button class="danger small" style="margin-left:auto;" onclick="resetMasterList()">Reset Summary List</button></h2>
+  <div class="row-inline" style="grid-template-columns:repeat(3,1fr) auto;">
+    <div class="field"><label>Item Number</label><input type="text" id="mItem" placeholder="e.g. LN001073"></div>
+    <div class="field"><label>Product Name</label><input type="text" id="mProduct" placeholder="Product description"></div>
+    <div class="field"><label id="lblMasterQty">Required Box Qty</label><input type="number" id="mQty" placeholder="e.g. 2"></div>
+    <button onclick="addMasterRow()">+ Add</button>
+  </div>
+  <div class="hint">Please copy and paste summary list here</div>
+  <p class="toggle-link" onclick="toggleBulk()">Paste a list in bulk instead ▾</p>
+  <div id="bulkArea" style="display:none; margin-top:10px;">
+    <textarea id="bulkInput" placeholder="ItemNumber, ProductName, RequiredBoxQty&#10;LN001073, HYFLEX 11-840-05-DOPE-DYED-LH-NA/LAC (INDX01560A3), 2"></textarea>
+    <div class="btn-row"><button class="secondary" onclick="bulkImport()">Import Pasted Rows</button></div>
+  </div>
+  <div class="table-wrap" style="margin-top:12px;">
+    <table>
+      <thead><tr><th>Item Number</th><th>Product Name</th><th id="thMasterQty">Required Box Qty</th><th></th></tr></thead>
+      <tbody id="masterTableBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- LOADING LIST -->
+<div class="card">
+  <h2>2. Loading List <span class="badge" id="loadingCount">0 rows</span><button class="danger small" style="margin-left:auto;" onclick="resetLoadingList()">Reset Loading List</button></h2>
+  <div class="row-inline">
+    <div class="field"><label>Item Number</label><input type="text" id="lItem" placeholder="e.g. LN001073"></div>
+    <div class="field"><label>Product Name</label><input type="text" id="lProduct" placeholder="Product description"></div>
+    <div class="field"><label>Lot Number</label><input type="text" id="lLot" placeholder="e.g. 2608050047, 260518-0092823232 or 260825DCS10022"></div>
+    <div class="field"><label id="lblLoadQty">Required Box Qty</label><input type="number" id="lQty" placeholder="e.g. 2"></div>
+    <button onclick="addLoadingRow()">+ Add</button>
+  </div>
+  <div class="hint">Please copy and paste loading list here</div>
+  <p class="toggle-link" onclick="toggleLoadingBulk()">Paste a list in bulk instead ▾</p>
+  <div id="loadingBulkArea" style="display:none; margin-top:10px;">
+    <textarea id="loadingBulkInput" style="min-height:220px;" placeholder="ItemNumber, ProductName, LotNumber, RequiredBoxQty&#10;LN001073, HYFLEX 11-840-05-DOPE-DYED-LH-NA/LAC (INDX01560A3), 2608050047, 2"></textarea>
+    <div class="hint" id="loadingBulkLineCount">0 line(s) in the box</div>
+    <div class="btn-row"><button class="secondary" onclick="loadingBulkImport()">Import Pasted Rows</button></div>
+  </div>
+  <div class="table-wrap" style="margin-top:12px; max-height:600px;">
+    <table>
+      <thead><tr><th>Item Number</th><th>Product Name</th><th>Lot Number (Loading List)</th><th id="thScannedLot">Scanned Lot Number</th><th>Extra Lot Number</th><th id="thLoadReqQty">Required Box Qty</th><th id="thLoadScannedQty">Scanned Box Qty</th><th>Exceeded By</th><th>Status</th><th></th></tr></thead>
+      <tbody id="loadingTableBody"></tbody>
+      <tfoot>
+        <tr style="font-weight:700;">
+          <td id="loadingTotalLabel" colspan="5">Total</td>
+          <td id="loadingTotalRequired">0</td>
+          <td id="loadingTotalScanned">0</td>
+          <td colspan="3"></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>
+
+<div class="mid-header">
+  <h1>Shipment Dispatch Verification System</h1>
+  <p class="app-subtitle">ANSELL TEXTILES LANKA PVT LTD</p>
+</div>
+
+<div class="grid">
+  <!-- SCAN STATION -->
+  <div class="card scan-station">
+    <h2>3. Scan Station</h2>
+    <div class="field">
+      <label>Scan Method</label>
+      <div class="btn-row" style="margin-top:2px;">
+        <label id="methodBarcodeLabel" style="display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:13px;color:#1c2733;">
+          <input type="radio" name="scanMethod" id="methodBarcode" value="barcode" checked> Barcode Scan
+        </label>
+        <label style="display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:13px;color:#1c2733;">
+          <input type="radio" name="scanMethod" id="methodQr" value="qr"> QR Code Scan
+        </label>
+      </div>
+      <div id="scanMethodLockedNote" class="hint" style="display:none;">🔒 Ansell Lanka shipments use QR Code Scan only.</div>
+    </div>
+    <div id="scanStatus" class="scan-status stage-item scan-row-alert">🔒 Please fill all Shipment Details to unlock scanning</div>
+    <div id="tallyInfo" class="tally-info" style="display:none;"></div>
+    <div id="exceedAlert" class="exceed-alert" style="display:none;"></div>
+
+    <div id="barcodeModeArea">
+      <div class="field">
+        <label>Scan Barcode</label>
+        <input type="text" id="scanBarcode" autocomplete="off" placeholder="Fill shipment details to unlock" disabled>
+      </div>
+    </div>
+
+    <div id="qrModeArea" style="display:none;">
+      <div class="field">
+        <label>Scan Item Number (QR)</label>
+        <input type="text" id="qrItemInput" autocomplete="off" placeholder="Fill shipment details to unlock" disabled>
+      </div>
+      <div class="field">
+        <label>Scan Lot Number (QR)</label>
+        <input type="text" id="qrLotInput" autocomplete="off" placeholder="Scan Item Number QR first" disabled>
+      </div>
+    </div>
+
+    <div class="field" style="display:none;"><input type="text" id="scanItem" disabled></div>
+    <div class="field" style="display:none;"><input type="text" id="scanProduct" disabled></div>
+    <div class="field" style="display:none;"><input type="text" id="scanLot" disabled></div>
+    <div class="btn-row">
+      <button class="secondary" onclick="undoLastScan()">Undo Last Scan</button>
+      <button class="secondary" onclick="resetStation()">Reset Station</button>
+    </div>
+
+    <div style="margin-top:16px; padding-top:14px; border-top:1px dashed var(--border);">
+      <p class="toggle-link" onclick="toggleManualEntry()">Can't scan? Enter Item &amp; Lot Number manually ▾</p>
+      <div id="manualEntryArea" style="display:none; margin-top:10px;">
+        <div class="hint" style="margin-bottom:8px;">Use this only when the barcode/QR code can't be scanned or is damaged.</div>
+        <div class="row-inline" style="grid-template-columns:1fr 1fr 110px auto;">
+          <div class="field"><label>Item Number</label><input type="text" id="manualItem" placeholder="e.g. LN001073"></div>
+          <div class="field"><label>Lot Number</label><input type="text" id="manualLot" placeholder="e.g. 260805"></div>
+          <div class="field"><label>Box Qty</label><input type="number" id="manualBoxQty" min="1" max="9999" step="1" value="1" inputmode="numeric"></div>
+          <button onclick="handleManualEntry()">Add Manual Entry</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCAN REPORT -->
+  <div class="card">
+    <div class="scan-report-top">
+      <h2 style="margin:0;">4. Scan Report <span class="badge" id="scanCount">0 scans</span></h2>
+      <div class="scan-report-stats">
+        <div class="stat mini"><div class="num" id="scanReportTotalScanned">0</div><div class="lbl" id="lblScanReportTotalScanned">Total Scanned Box Qty</div></div>
+        <div class="stat mini"><div class="num" id="scanReportCompletionPct">0%</div><div class="lbl">Load Completion</div></div>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Item Number</th><th id="thScanLot" style="display:none;">Lot Number</th><th>Product Name</th><th>Required Qty</th><th>Scanned Qty</th><th>Tally (Scanned Qty - Required Qty)</th><th>Time</th><th>Remarks</th><th></th></tr></thead>
+        <tbody id="scanTableBody"></tbody>
+      </table>
+    </div>
+    <div class="btn-row"><button class="danger" onclick="clearScanReport()">Clear Scan Report</button></div>
+
+  </div>
+</div>
+
+<!-- LIVE SUMMARY -->
+<div class="card">
+  <h2>5. Live Summary (auto-calculated from Scan Report)</h2>
+  <div class="btn-row" id="summaryFilterRow" style="margin-bottom:14px;">
+    <button class="filter-btn active" data-filter="all" onclick="setSummaryFilter('all')">All <span id="filterCountAll"></span></button>
+    <button class="filter-btn filter-pending" data-filter="pending" onclick="setSummaryFilter('pending')">Pending <span id="filterCountPending"></span></button>
+    <button class="filter-btn filter-met" data-filter="met" onclick="setSummaryFilter('met')">Completed <span id="filterCountMet"></span></button>
+    <button class="filter-btn filter-exceed" data-filter="exceed" onclick="setSummaryFilter('exceed')">Exceeded <span id="filterCountExceed"></span></button>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Item Number</th><th>Product Name</th><th id="thSummaryReqQty">Required Box Qty</th><th id="thSummaryScannedQty">Scanned Box Qty</th><th>Tally (Scanned Qty - Required Box Qty)</th><th>Exceeded By</th><th>Status</th></tr></thead>
+      <tbody id="summaryTableBody"></tbody>
+    </table>
+  </div>
+  <div class="totals-bar">
+    <div class="stat"><div class="num" id="totalScannedAll">0</div><div class="lbl" id="lblTotalScannedAll">Total Scanned Box Qty</div></div>
+    <div class="stat"><div class="num" id="totalRequiredAll">0</div><div class="lbl" id="lblTotalRequiredAll">Total Required Box Qty</div></div>
+    <div class="stat"><div class="num" id="totalMet">0</div><div class="lbl">Items Completed</div></div>
+    <div class="stat"><div class="num" id="totalPending">0</div><div class="lbl">Items Pending</div></div>
+  </div>
+  <div class="btn-row" style="margin-top:16px;">
+    <button id="btnDownloadExcel" onclick="exportToExcel()">⬇ Download Excel Report</button>
+  </div>
+</div>
+
+<!--
+  VERSION NOTE: bump the number below by 0.1 and replace the short note in
+  parentheses with a few words on the latest functional change, every time
+  this app is meaningfully updated (e.g. 2.2 -> 2.3). Keep the note short -
+  a few words on what's new, not a full changelog.
+-->
+<p class="footer-note">Shipment Dispatch Verification System • System Version 2.9 (Manual Entry Box Qty, unique 2-second loud error sounds)</p>
+
+<script>
+let masterData = [];
+let loadingList = [];
+let scanLog = [];
+
+const norm = s => (s || '').toString().trim().toUpperCase();
+
+// ---------- SHIPMENT DETAILS ----------
+const loadIdInput = document.getElementById('loadId');
+const destinationInput = document.getElementById('destination');
+const loadingDateInput = document.getElementById('loadingDate');
+const userNameInput = document.getElementById('userName');
+const employeeNumberInput = document.getElementById('employeeNumber');
+const shipmentBanner = document.getElementById('shipmentBanner');
+const shipmentTypeAnsellRadio = document.getElementById('shipmentTypeAnsell');
+const shipmentTypeExportRadio = document.getElementById('shipmentTypeExport');
+
+function getShipmentType(){
+  if(shipmentTypeAnsellRadio.checked) return 'ansell';
+  if(shipmentTypeExportRadio.checked) return 'export';
+  return '';
+}
+
+// ---------- BOX / BAG UNIT LABEL ----------
+// Ansell Lanka shipments are counted in Bags; Export Shipments (and the
+// default/no-selection state) keep the original "Box" wording everywhere.
+function boxUnitWord(capitalized){
+  const isAnsell = getShipmentType() === 'ansell';
+  const w = isAnsell ? 'Bag' : 'Box';
+  return capitalized ? w : w.toLowerCase();
+}
+function boxUnitWordPlural(capitalized){
+  return boxUnitWord(capitalized) + 's';
+}
+
+// Refreshes every on-screen label that mentions the Box/Bag unit so it
+// matches the currently selected Shipment Type. Called whenever the
+// Shipment Type changes (see applyShipmentTypeRestriction) and once on load.
+function applyBoxUnitLabels(){
+  const unit = boxUnitWord(true);
+  const setText = (id, text) => { const el = document.getElementById(id); if(el) el.textContent = text; };
+  const setPlaceholder = (id, text) => { const el = document.getElementById(id); if(el) el.placeholder = text; };
+
+  setText('lblMasterHeadingQty', 'Required ' + unit + ' Qty');
+  setText('lblMasterQty', 'Required ' + unit + ' Qty');
+  setText('thMasterQty', 'Required ' + unit + ' Qty');
+  setText('lblLoadQty', 'Required ' + unit + ' Qty');
+  setText('thLoadReqQty', 'Required ' + unit + ' Qty');
+  setText('thLoadScannedQty', 'Scanned ' + unit + ' Qty');
+  setText('lblScanReportTotalScanned', 'Total Scanned ' + unit + ' Qty');
+  setText('thSummaryReqQty', 'Required ' + unit + ' Qty');
+  setText('thSummaryScannedQty', 'Scanned ' + unit + ' Qty');
+  setText('lblTotalScannedAll', 'Total Scanned ' + unit + ' Qty');
+  setText('lblTotalRequiredAll', 'Total Required ' + unit + ' Qty');
+
+  setPlaceholder('bulkInput', 'ItemNumber, ProductName, Required' + unit + 'Qty\nLN001073, HYFLEX 11-840-05-DOPE-DYED-LH-NA/LAC (INDX01560A3), 2');
+  setPlaceholder('loadingBulkInput', 'ItemNumber, ProductName, LotNumber, Required' + unit + 'Qty\nLN001073, HYFLEX 11-840-05-DOPE-DYED-LH-NA/LAC (INDX01560A3), 2608050047, 2');
+}
+
+function checkShipmentDetailsComplete(){
+  const loadId = loadIdInput.value.trim();
+  const dest = destinationInput.value.trim();
+  const date = loadingDateInput.value.trim();
+  const user = userNameInput.value.trim();
+  const emp = employeeNumberInput.value.trim();
+  const shipmentType = getShipmentType();
+
+  const isComplete = loadId && dest && date && user && emp && shipmentType;
+
+  if(!isComplete){
+    shipmentBanner.style.color = 'var(--danger)';
+    shipmentBanner.textContent = '🔒 Action Locked: Please fill in ALL shipment details above, including Shipment Type, to begin.';
+    document.title = 'Shipment Dispatch Verification System';
+    lockScanStation(true);
+  } else {
+    shipmentBanner.style.color = 'var(--blue-dark)';
+    shipmentBanner.textContent = `Load ID: ${loadId}  •  Destination: ${dest}  •  User: ${user} (${emp})`;
+    document.title = `${loadId} - ${dest} | Ansell Shipment Scanning`;
+    lockScanStation(false);
+  }
+  return isComplete;
+}
+
+// Runs whenever a detail box changes: keeps the session saved.
+function onShipmentDetailsChanged(){
+  const complete = checkShipmentDetailsComplete();
+  saveState();
+  return complete;
+}
+
+function validateShipmentDetails(){
+  const fields = [
+    { el: loadIdInput, name: 'Load ID' },
+    { el: destinationInput, name: 'Destination' },
+    { el: loadingDateInput, name: 'Loading Date' },
+    { el: userNameInput, name: 'User Name' },
+    { el: employeeNumberInput, name: 'Employee Number' }
+  ];
+  
+  let missing = [];
+  fields.forEach(f => {
+    if(!f.el.value.trim()){
+      f.el.classList.add('field-error');
+      missing.push(f.name);
+    } else {
+      f.el.classList.remove('field-error');
+    }
+  });
+
+  if(!getShipmentType()){
+    missing.push('Shipment Type');
+  }
+
+  if(missing.length > 0){
+    alert('⛔ ACTION BLOCKED!\n\nYou must fill in all shipment details before doing anything.\nMissing: ' + missing.join(', '));
+    return false;
+  }
+  return true;
+}
+
+function lockScanStation(locked){
+  const isQr = methodQrRadio.checked;
+  if(locked){
+    barcodeInput.disabled = true;
+    barcodeInput.placeholder = 'Fill shipment details to unlock';
+    qrItemInput.disabled = true;
+    qrItemInput.placeholder = 'Fill shipment details to unlock';
+    qrLotInput.disabled = true;
+    statusBox.className = 'scan-status stage-item scan-row-alert';
+    statusBox.textContent = '🔒 Please fill all Shipment Details to unlock scanning';
+  } else {
+    if(isQr){
+      if(!qrPendingItem){
+        qrItemInput.disabled = false;
+        qrItemInput.placeholder = 'Click here & scan Item Number QR code';
+        qrLotInput.disabled = true;
+        statusBox.className = 'scan-status stage-item';
+        statusBox.textContent = '➡️ Scan the ITEM NUMBER (QR)';
+      }
+    } else {
+      barcodeInput.disabled = false;
+      barcodeInput.placeholder = 'Click here & scan barcode';
+      statusBox.className = 'scan-status stage-item';
+      statusBox.textContent = '➡️ Scan the BARCODE';
+    }
+  }
+}
+
+[loadIdInput, destinationInput, loadingDateInput, userNameInput, employeeNumberInput].forEach(el => {
+  el.addEventListener('input', () => {
+    el.classList.remove('field-error');
+    onShipmentDetailsChanged();
+  });
+  el.addEventListener('change', () => { onShipmentDetailsChanged(); });
+});
+
+[shipmentTypeAnsellRadio, shipmentTypeExportRadio].forEach(el => {
+  el.addEventListener('change', () => {
+    applyShipmentTypeRestriction();
+    onShipmentDetailsChanged();
+  });
+});
+
+function sanitizeForFilename(s){
+  return (s || '').toString().trim().replace(/[^a-zA-Z0-9-_]+/g,'_').replace(/_+/g,'_').replace(/^_|_$/g,'') || 'Unspecified';
+}
+
+// Reads the five detail boxes + shipment type in one go.
+function getShipmentDetails(){
+  return {
+    loadId: loadIdInput.value.trim(),
+    destination: destinationInput.value.trim(),
+    loadingDate: loadingDateInput.value.trim(),
+    userName: userNameInput.value.trim(),
+    employeeNumber: employeeNumberInput.value.trim(),
+    shipmentType: getShipmentType()
+  };
+}
+
+// ---------- RESET SHIPMENT DETAILS ----------
+// Clears ONLY the shipment detail boxes and the Shipment Type, so a different
+// load can be entered. The Summary List, Loading List and Scan Report stay as
+// they are. Scanning locks itself again until new details are filled in.
+function resetShipmentDetails(){
+  const d = getShipmentDetails();
+  const anyFilled = d.loadId || d.destination || d.loadingDate || d.userName || d.employeeNumber || d.shipmentType;
+
+  if(anyFilled){
+    let msg = 'Reset the Shipment Details?\n\nLoad ID, Destination, Loading Date, User Name, Employee Number and Shipment Type will be cleared so new details can be entered.\n\nThe Summary List, Loading List and Scan Report are NOT cleared.';
+    if(scanLog.length > 0){
+      msg += '\n\n⚠️ ' + scanLog.length + ' scan(s) are already logged. They stay on screen and will be reported under the NEW shipment details. Download the Excel report first if the current Load ID must be kept.';
+    }
+    if(!confirm(msg)) return;
+  }
+
+  loadIdInput.value = '';
+  destinationInput.value = '';
+  loadingDateInput.value = '';
+  userNameInput.value = '';
+  employeeNumberInput.value = '';
+  shipmentTypeAnsellRadio.checked = false;
+  shipmentTypeExportRadio.checked = false;
+  [loadIdInput, destinationInput, loadingDateInput, userNameInput, employeeNumberInput]
+    .forEach(el => el.classList.remove('field-error'));
+
+  applyShipmentTypeRestriction();
+  checkShipmentDetailsComplete();
+  resetStation();
+  saveState();
+  loadIdInput.focus();
+}
+
+// ============================================================
+//  AUTO-SAVE / CRASH RECOVERY
+//  Every change is written into this browser's local storage, so closing the
+//  tab, closing the browser or a power cut no longer loses the scanned data.
+//  On the next open the app ASKS whether the previous list should be loaded.
+// ============================================================
+const STORAGE_KEY = 'ATL_SHIPMENT_SCAN_SESSION_V2';
+// Where a previous session is parked when "Cancel - Start Fresh" is pressed, so
+// nothing is ever destroyed by accident and it can still be loaded later.
+const HELD_KEY = 'ATL_SHIPMENT_SCAN_SESSION_V2_HELD';
+const STORAGE_VERSION = 2;
+let storageAvailable = true;
+let lastSavedAt = null;
+// While the recovery dialog is open nothing may be written to storage,
+// otherwise the empty screen would overwrite the saved data.
+let restorePending = false;
+let pendingSnapshot = null;
+
+const sessionBarEl = document.getElementById('sessionBar');
+const sessionMsgEl = document.getElementById('sessionMsg');
+
+function hasAnyData(){
+  return scanLog.length > 0 || masterData.length > 0 || loadingList.length > 0;
+}
+
+function buildSnapshot(){
+  const d = getShipmentDetails();
+  return {
+    version: STORAGE_VERSION,
+    savedAt: new Date().toISOString(),
+    shipment: d,
+    scanMethod: (typeof methodQrRadio !== 'undefined' && methodQrRadio.checked) ? 'qr' : 'barcode',
+    masterData: masterData,
+    loadingList: loadingList,
+    scanLog: scanLog
+  };
+}
+
+function snapshotHasContent(d){
+  if(!d || typeof d !== 'object') return false;
+  const s = d.shipment || {};
+  return (Array.isArray(d.scanLog) && d.scanLog.length > 0) ||
+         (Array.isArray(d.masterData) && d.masterData.length > 0) ||
+         (Array.isArray(d.loadingList) && d.loadingList.length > 0) ||
+         !!s.loadId;
+}
+
+function saveState(){
+  if(restorePending) return;   // dialog open - never overwrite the saved session
+  if(!storageAvailable) return;
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(buildSnapshot()));
+    lastSavedAt = new Date();
+    setSessionStatus('ok');
+  }catch(err){
+    storageAvailable = false;
+    setSessionStatus('failed');
+    console.warn('Auto-save failed:', err);
+  }
+}
+
+// ---------- PREVIOUS SHIPMENTS ARCHIVE (last 10 shipments, kept in this browser) ----------
+// Saved only at safe moments (new shipment / Excel download / page hidden / cancel-restore /
+// before loading another shipment) - NEVER inside the per-scan path, so scanning speed is unaffected.
+const ARCHIVE_KEY = 'ATL_SHIPMENT_ARCHIVE_V1';
+const ARCHIVE_MAX = 10;
+
+function readArchive(){
+  try{
+    const a = JSON.parse(localStorage.getItem(ARCHIVE_KEY) || '[]');
+    return Array.isArray(a) ? a : [];
+  }catch(err){ return []; }
+}
+
+function writeArchive(list){
+  // If the browser quota is full, drop the oldest shipment and retry.
+  while(true){
+    try{ localStorage.setItem(ARCHIVE_KEY, JSON.stringify(list)); return true; }
+    catch(err){
+      if(list.length <= 1) return false;
+      list.pop();                       // list is newest-first, so pop() removes the oldest
+    }
+  }
+}
+
+function archiveKeyOf(snap){
+  const s = snap.shipment || {};
+  return [s.loadId || '', s.destination || '', s.loadingDate || ''].join('|').toUpperCase();
+}
+
+function archiveSnapshot(snap){
+  try{
+    if(!storageAvailable || !snap) return;
+    const s = snap.shipment || {};
+    if(!s.loadId || !Array.isArray(snap.scanLog) || snap.scanLog.length === 0) return;
+    const key = archiveKeyOf(snap);
+    let list = readArchive().filter(e => e.key !== key);   // same shipment is updated, not duplicated
+    list.unshift({
+      key: key, loadId: s.loadId, destination: s.destination || '', loadingDate: s.loadingDate || '',
+      shipmentType: s.shipmentType || '', scanCount: snap.scanLog.length,
+      archivedAt: new Date().toISOString(), snapshot: snap
+    });
+    list = list.slice(0, ARCHIVE_MAX);
+    if(!writeArchive(list)) console.warn('Shipment archive is full - not saved.');
+  }catch(err){ console.warn('Archive skipped:', err); }
+  updateArchiveButton();
+}
+
+function archiveCurrentSession(){
+  if(restorePending || scanLog.length === 0) return;
+  archiveSnapshot(buildSnapshot());
+}
+
+function updateArchiveButton(){
+  const btn = document.getElementById('btnPrevShipments');
+  if(btn) btn.textContent = '📂 Previous Shipments (' + readArchive().length + ')';
+}
+
+function toast(msg){
+  const t = document.getElementById('l10Toast');
+  t.textContent = msg; t.style.display = 'block';
+  clearTimeout(toast._t); toast._t = setTimeout(()=>{ t.style.display = 'none'; }, 3500);
+}
+
+function openArchiveDialog(){
+  archiveCurrentSession();              // include the shipment on screen right now
+  const list = readArchive();
+  const body = document.getElementById('archiveBody');
+  body.innerHTML = list.length === 0
+    ? '<tr><td colspan="7" class="empty-msg">No previous shipments saved in this browser yet.</td></tr>'
+    : list.map((e,i)=>
+        '<tr><td>' + (i+1) + '</td><td>' + escapeHtml(e.loadId) + '</td><td>' + escapeHtml(e.destination) +
+        '</td><td>' + escapeHtml(e.loadingDate) + '</td><td>' + e.scanCount + '</td><td>' +
+        escapeHtml(formatWhen(e.archivedAt)) + '</td><td style="white-space:nowrap;">' +
+        '<button class="small success" onclick="loadArchivedShipment(' + i + ')">Load</button> ' +
+        '<button class="small danger" onclick="deleteArchivedShipment(' + i + ')">✕</button></td></tr>').join('');
+  document.getElementById('archiveOverlay').classList.add('show');
+}
+function closeArchiveDialog(){ document.getElementById('archiveOverlay').classList.remove('show'); }
+
+function loadArchivedShipment(i){
+  const list = readArchive();
+  const e = list[i];
+  if(!e || !e.snapshot){ toast('That shipment could not be read.'); return; }
+  if(hasAnyData() && !confirm('Load shipment "' + e.loadId + '" (' + e.scanCount + ' scans)?\n\nThe shipment on screen now is saved to Previous Shipments first, then replaced.')) return;
+  archiveCurrentSession();
+  applySnapshot(e.snapshot);
+  saveState();
+  closeArchiveDialog();
+  updateArchiveButton();
+  setSessionStatus('restored', 'Previous shipment <strong>' + escapeHtml(e.loadId) + '</strong> loaded: ' + e.scanCount + ' scan(s). Auto-save continues from here.');
+}
+
+function deleteArchivedShipment(i){
+  const list = readArchive();
+  const e = list[i];
+  if(!e) return;
+  if(!confirm('Delete saved shipment "' + e.loadId + '" from this browser? This cannot be undone.')) return;
+  list.splice(i,1);
+  try{ localStorage.setItem(ARCHIVE_KEY, JSON.stringify(list)); }catch(err){}
+  updateArchiveButton();
+  openArchiveDialog();
+}
+
+// Warn if a second tab/window of the app is saving to the same session.
+window.addEventListener('storage', function(e){
+  if(e.key === STORAGE_KEY && e.newValue){
+    const bar = document.getElementById('tabConflictBar');
+    if(bar) bar.style.display = 'block';
+  }
+});
+
+function readSavedState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return null;
+    const data = JSON.parse(raw);
+    return (data && typeof data === 'object') ? data : null;
+  }catch(err){ return null; }
+}
+
+function clearSavedState(){
+  try{ localStorage.removeItem(STORAGE_KEY); }catch(err){ /* ignore */ }
+}
+
+function readHeldState(){
+  try{
+    const raw = localStorage.getItem(HELD_KEY);
+    if(!raw) return null;
+    const d = JSON.parse(raw);
+    return snapshotHasContent(d) ? d : null;
+  }catch(err){ return null; }
+}
+function holdState(data){
+  try{ localStorage.setItem(HELD_KEY, JSON.stringify(data)); }catch(err){ /* ignore */ }
+}
+function clearHeldState(){
+  try{ localStorage.removeItem(HELD_KEY); }catch(err){ /* ignore */ }
+}
+function updateHeldButton(){
+  const btn = document.getElementById('btnRestoreHeld');
+  if(btn) btn.style.display = readHeldState() ? '' : 'none';
+}
+
+// Loads a snapshot object back into the live app state.
+function applySnapshot(data){
+  masterData  = Array.isArray(data.masterData)  ? data.masterData  : [];
+  loadingList = Array.isArray(data.loadingList) ? data.loadingList : [];
+  scanLog     = Array.isArray(data.scanLog)     ? data.scanLog     : [];
+
+  const s = data.shipment || {};
+  loadIdInput.value         = s.loadId || '';
+  destinationInput.value    = s.destination || '';
+  loadingDateInput.value    = s.loadingDate || '';
+  userNameInput.value       = s.userName || '';
+  employeeNumberInput.value = s.employeeNumber || '';
+  shipmentTypeAnsellRadio.checked = (s.shipmentType === 'ansell');
+  shipmentTypeExportRadio.checked = (s.shipmentType === 'export');
+
+  if(data.scanMethod === 'barcode' && s.shipmentType !== 'ansell'){
+    methodBarcodeRadio.checked = true;
+  } else if(data.scanMethod === 'qr'){
+    methodQrRadio.checked = true;
+  }
+
+  applyShipmentTypeRestriction();
+  checkShipmentDetailsComplete();
+  renderAll();
+  resetStation();
+}
+
+function formatWhen(iso){
+  try{
+    const d = new Date(iso);
+    return isNaN(d.getTime()) ? '' : d.toLocaleString();
+  }catch(err){ return ''; }
+}
+
+function setSessionStatus(state, extraText){
+  if(!sessionBarEl || !sessionMsgEl) return;
+  sessionBarEl.classList.remove('warn','danger');
+  let dotClass = '', text = '';
+  if(state === 'failed'){
+    sessionBarEl.classList.add('danger');
+    dotClass = 'failed';
+    text = 'Auto-save is NOT working in this browser (private/incognito mode or storage blocked). Export the Summary/Loading/Scan Report to Excel often before closing.';
+  } else if(state === 'restored'){
+    sessionBarEl.classList.add('warn');
+    text = extraText || 'Previous session restored.';
+  } else {
+    text = 'Auto-save is on' + (lastSavedAt ? ' - last saved ' + lastSavedAt.toLocaleTimeString() : '') +
+           '. Scanned data stays in this browser even if the page or browser is closed.';
+  }
+  sessionMsgEl.innerHTML = '<span id="autosaveDot" class="' + dotClass + '"></span>' + text;
+}
+
+// ---------- START-UP RECOVERY DIALOG ----------
+function scanTimeText(s){
+  if(!s) return '';
+  if(s.timestamp){
+    try{ return new Date(s.timestamp).toLocaleString(); }catch(err){ return ''; }
+  }
+  return s.time || '';
+}
+
+function openRestoreDialog(data){
+  pendingSnapshot = data;
+  restorePending = true;
+
+  const s = data.shipment || {};
+  const scans = Array.isArray(data.scanLog) ? data.scanLog : [];
+  const when = formatWhen(data.savedAt);
+
+  document.getElementById('recoverInfo').innerHTML =
+    '<strong>Load ID:</strong> ' + escapeHtml(s.loadId || '(not set)') +
+    ' &nbsp;•&nbsp; <strong>Destination:</strong> ' + escapeHtml(s.destination || '(not set)') +
+    ' &nbsp;•&nbsp; <strong>Loading Date:</strong> ' + escapeHtml(s.loadingDate || '(not set)') +
+    '<br><strong>User:</strong> ' + escapeHtml(s.userName || '(not set)') + ' (' + escapeHtml(s.employeeNumber || '-') + ')' +
+    ' &nbsp;•&nbsp; <strong>Shipment Type:</strong> ' + escapeHtml(s.shipmentType === 'ansell' ? 'Ansell Lanka' : (s.shipmentType === 'export' ? 'Export Shipment' : '(not set)')) +
+    (when ? '<br><strong>Last saved:</strong> ' + escapeHtml(when) : '');
+
+  document.getElementById('recoverChips').innerHTML =
+    '<div class="recover-chip"><div class="num">' + scans.length + '</div><div class="lbl">Scans</div></div>' +
+    '<div class="recover-chip"><div class="num">' + (Array.isArray(data.masterData) ? data.masterData.length : 0) + '</div><div class="lbl">Summary Rows</div></div>' +
+    '<div class="recover-chip"><div class="num">' + (Array.isArray(data.loadingList) ? data.loadingList.length : 0) + '</div><div class="lbl">Loading Rows</div></div>';
+
+  document.getElementById('recoverListLabel').textContent =
+    'Previously scanned list (' + scans.length + ' scan' + (scans.length === 1 ? '' : 's') + ')';
+
+  const body = document.getElementById('recoverScanBody');
+  if(scans.length === 0){
+    body.innerHTML = '<tr><td colspan="6" class="empty-msg">No scans were recorded in that session - list data only.</td></tr>';
+  } else {
+    body.innerHTML = scans.map((sc,i)=>
+      '<tr><td>' + (i+1) + '</td>' +
+      '<td>' + escapeHtml(sc.itemNumber || '') + '</td>' +
+      '<td>' + escapeHtml(sc.productName || '') + '</td>' +
+      '<td>' + escapeHtml(sc.lotNumber || '') + '</td>' +
+      '<td>' + escapeHtml(sc.remarks || '') + '</td>' +
+      '<td>' + escapeHtml(scanTimeText(sc)) + '</td></tr>').join('');
+  }
+
+  document.getElementById('recoverOverlay').classList.add('show');
+}
+
+function closeRestoreDialog(){
+  document.getElementById('recoverOverlay').classList.remove('show');
+}
+
+// "Load Previous Data"
+function confirmRestorePrompt(){
+  const data = pendingSnapshot;
+  closeRestoreDialog();
+  restorePending = false;
+  pendingSnapshot = null;
+  if(!data){ renderAll(); return; }
+
+  applySnapshot(data);
+  clearHeldState();
+  updateHeldButton();
+  saveState();
+  setSessionStatus('restored',
+    'Previous session loaded: <strong>' + (Array.isArray(data.scanLog) ? data.scanLog.length : 0) + ' scan(s)</strong>, ' +
+    (Array.isArray(data.masterData) ? data.masterData.length : 0) + ' summary row(s), ' +
+    (Array.isArray(data.loadingList) ? data.loadingList.length : 0) + ' loading row(s). Auto-save continues from here.');
+}
+
+// "Cancel - Start Fresh": the old session is parked, never deleted.
+function cancelRestorePrompt(){
+  const data = pendingSnapshot;
+  closeRestoreDialog();
+  restorePending = false;
+  pendingSnapshot = null;
+
+  if(data){
+    archiveSnapshot(data);
+    holdState(data);
+    clearSavedState();
+  }
+  masterData = []; loadingList = []; scanLog = [];
+  loadIdInput.value = ''; destinationInput.value = ''; loadingDateInput.value = '';
+  userNameInput.value = ''; employeeNumberInput.value = '';
+  shipmentTypeAnsellRadio.checked = false; shipmentTypeExportRadio.checked = false;
+
+  applyShipmentTypeRestriction();
+  checkShipmentDetailsComplete();
+  renderAll();
+  resetStation();
+  updateHeldButton();
+  setSessionStatus('restored',
+    'Started fresh. The previous session was <strong>not deleted</strong> - press "Load Previous Scanned List" to bring it back at any time before starting a new shipment.');
+}
+
+// Brings back a session that was parked with Cancel.
+function restoreHeldSession(){
+  const data = readHeldState();
+  if(!data){ alert('There is no previous session parked in this browser.'); updateHeldButton(); return; }
+  const count = Array.isArray(data.scanLog) ? data.scanLog.length : 0;
+  if(hasAnyData() && !confirm('Load the previous session (' + count + ' scan(s))?\n\nThis replaces what is on screen now (' + scanLog.length + ' scan(s)).')) return;
+  applySnapshot(data);
+  clearHeldState();
+  updateHeldButton();
+  saveState();
+  setSessionStatus('restored', 'Previous session loaded - ' + count + ' scan(s) restored. Auto-save is on from here.');
+}
+
+// ---------- START A NEW SHIPMENT (the only thing that wipes saved data) ----------
+function startNewShipment(){
+  if(hasAnyData()){
+    if(!confirm('Start a NEW shipment?\n\nThis permanently clears the saved session: ' + scanLog.length + ' scan(s), ' + masterData.length + ' summary row(s) and ' + loadingList.length + ' loading row(s).\n\nMake sure the Excel report has been downloaded first.')) return;
+    if(!confirm('Last check - this cannot be undone. Clear everything and start fresh?')) return;
+  }
+  archiveCurrentSession();
+  clearSavedState();
+  clearHeldState();
+  location.reload();
+}
+
+// ---------- SAVE WHEN THE PAGE IS CLOSED / HIDDEN ----------
+let exportInProgress = false;
+window.addEventListener('beforeunload', function(e){
+  if(exportInProgress) return;
+  if(scanLog.length > 0){
+    saveState();
+    e.preventDefault();
+    e.returnValue = '';
+    return '';
+  }
+});
+document.addEventListener('visibilitychange', function(){
+  if(document.visibilityState === 'hidden'){ saveState(); archiveCurrentSession(); }
+});
+window.addEventListener('pagehide', function(){ saveState(); archiveCurrentSession(); });
+
+// ---------- MASTER DATA ----------
+function addMasterRow(){
+  if(!validateShipmentDetails()) return;
+  const item = document.getElementById('mItem').value.trim();
+  const product = document.getElementById('mProduct').value.trim();
+  const qty = parseInt(document.getElementById('mQty').value, 10);
+  if(!item || isNaN(qty)){
+    alert('Please fill Item Number and a numeric Required ' + boxUnitWord(true) + ' Qty.');
+    return;
+  }
+  const existing = masterData.find(m => norm(m.itemNumber) === norm(item));
+  if(existing){
+    existing.productName = product || existing.productName;
+    existing.requiredQty = qty;
+  } else {
+    masterData.push({itemNumber:item, productName:product || '(no name)', requiredQty:qty});
+  }
+  document.getElementById('mItem').value = '';
+  document.getElementById('mProduct').value = '';
+  document.getElementById('mQty').value = '';
+  document.getElementById('mItem').focus();
+  renderAll();
+}
+document.getElementById('mQty').addEventListener('keydown', e=>{ if(e.key==='Enter') addMasterRow(); });
+
+function deleteMasterRow(idx){
+  if(!validateShipmentDetails()) return;
+  masterData.splice(idx,1);
+  renderAll();
+}
+
+function resetMasterList(){
+  if(!validateShipmentDetails()) return;
+  if(!confirm('Reset the entire Summary List? This cannot be undone.')) return;
+  masterData = [];
+  renderAll();
+}
+
+function toggleBulk(){
+  const el = document.getElementById('bulkArea');
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+function bulkImport(){
+  if(!validateShipmentDetails()) return;
+  const raw = document.getElementById('bulkInput').value;
+  const lines = raw.split('\n').map(l=>l.trim()).filter(Boolean);
+  let added = 0, updated = 0, combined = 0;
+
+  // First pass: parse every pasted line, then auto-summarize by Item Number -
+  // if the same item number appears more than once in the pasted text (e.g.
+  // several separate bag scans of the same item), their quantities are added
+  // together into a single row instead of the later line overwriting the
+  // earlier one.
+  const pastedMap = new Map(); // key: norm(item) -> {itemNumber, productName, requiredQty, hits}
+  const pastedOrder = [];
+  lines.forEach(line=>{
+    let parts = line.includes('\t') ? line.split('\t').map(p=>p.trim()) : line.split(',').map(p=>p.trim());
+    if(parts.length < 2) return;
+
+    const item = parts[0];
+    if(/item.?number/i.test(item)) return;
+
+    let product = '';
+    let qty = 0;
+
+    if(parts.length >= 3){
+      qty = parts[parts.length - 1];
+      product = parts.slice(1, parts.length - 1).join(', ');
+    } else {
+      qty = parts[1];
+    }
+
+    const q = parseInt(qty, 10);
+    if(!item || isNaN(q)) return;
+
+    const key = norm(item);
+    if(pastedMap.has(key)){
+      const entry = pastedMap.get(key);
+      entry.requiredQty += q;
+      entry.productName = product || entry.productName;
+      entry.hits++;
+    } else {
+      pastedMap.set(key, {itemNumber:item, productName:product || '(no name)', requiredQty:q, hits:1});
+      pastedOrder.push(key);
+    }
+  });
+
+  // Second pass: merge the summarized pasted rows into the existing Summary List.
+  const indexMap = new Map();
+  masterData.forEach((m, idx) => indexMap.set(norm(m.itemNumber), idx));
+  pastedOrder.forEach(key=>{
+    const entry = pastedMap.get(key);
+    if(entry.hits > 1) combined++;
+    if(indexMap.has(key)){
+      const idx = indexMap.get(key);
+      masterData[idx].productName = entry.productName || masterData[idx].productName;
+      masterData[idx].requiredQty = entry.requiredQty;
+      updated++;
+    } else {
+      masterData.push({itemNumber:entry.itemNumber, productName:entry.productName, requiredQty:entry.requiredQty});
+      indexMap.set(key, masterData.length - 1);
+      added++;
+    }
+  });
+  document.getElementById('bulkInput').value = '';
+  let msg = added + ' row(s) added, ' + updated + ' row(s) updated.';
+  if(combined) msg += ' (' + combined + ' item number(s) had multiple pasted lines summed together.)';
+  alert(msg);
+  renderAll();
+}
+
+// ---------- LOADING LIST ----------
+function addLoadingRow(){
+  if(!validateShipmentDetails()) return;
+  const item = document.getElementById('lItem').value.trim();
+  const product = document.getElementById('lProduct').value.trim();
+  const lot = document.getElementById('lLot').value.trim();
+  const qty = parseInt(document.getElementById('lQty').value, 10);
+  if(!item || !lot || isNaN(qty)){
+    alert('Please fill Item Number, Lot Number and a numeric Required ' + boxUnitWord(true) + ' Qty.');
+    return;
+  }
+  const existing = loadingList.find(m => norm(m.itemNumber) === norm(item) && norm(m.lotNumber) === norm(lot));
+  if(existing){
+    existing.productName = product || existing.productName;
+    existing.requiredQty = qty;
+  } else {
+    loadingList.push({itemNumber:item, productName:product || '(no name)', lotNumber:lot, requiredQty:qty});
+  }
+  document.getElementById('lItem').value = '';
+  document.getElementById('lProduct').value = '';
+  document.getElementById('lLot').value = '';
+  document.getElementById('lQty').value = '';
+  document.getElementById('lItem').focus();
+  renderAll();
+}
+document.getElementById('lQty').addEventListener('keydown', e=>{ if(e.key==='Enter') addLoadingRow(); });
+
+function deleteLoadingRow(idx){
+  if(!validateShipmentDetails()) return;
+  loadingList.splice(idx,1);
+  renderAll();
+}
+
+function resetLoadingList(){
+  if(!validateShipmentDetails()) return;
+  if(!confirm('Reset the entire Loading List? This cannot be undone.')) return;
+  loadingList = [];
+  renderAll();
+}
+
+function toggleLoadingBulk(){
+  const el = document.getElementById('loadingBulkArea');
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+const loadingBulkInputEl = document.getElementById('loadingBulkInput');
+const loadingBulkLineCountEl = document.getElementById('loadingBulkLineCount');
+function updateLoadingBulkLineCount(){
+  const n = loadingBulkInputEl.value.split('\n').map(l=>l.trim()).filter(Boolean).length;
+  loadingBulkLineCountEl.textContent = n + ' line(s) in the box';
+}
+loadingBulkInputEl.addEventListener('input', updateLoadingBulkLineCount);
+
+function loadingBulkImport(){
+  if(!validateShipmentDetails()) return;
+  const raw = document.getElementById('loadingBulkInput').value;
+  const lines = raw.split('\n').map(l=>l.trim()).filter(Boolean);
+  let added = 0, updated = 0, skipped = 0, combined = 0;
+  const skippedLines = [];
+
+  // First pass: parse every pasted line, then auto-summarize by Item Number +
+  // Lot Number - if the same item/lot pair appears more than once in the
+  // pasted text (e.g. several separate bag scans of the same lot), their
+  // quantities are added together into a single row instead of creating
+  // duplicate rows.
+  const pastedMap = new Map(); // key: norm(item)+'|'+norm(lot) -> {itemNumber, productName, lotNumber, requiredQty, hits}
+  const pastedOrder = [];
+  lines.forEach(line=>{
+    let parts = line.includes('\t') ? line.split('\t').map(p=>p.trim()) : line.split(',').map(p=>p.trim());
+    if(parts.length < 4){ skipped++; skippedLines.push(line); return; }
+    const item = parts[0];
+    if(/item.?number/i.test(item)) return;
+    const qty = parts[parts.length - 1];
+    const lot = parts[parts.length - 2];
+    const product = parts.slice(1, parts.length - 2).join(', ');
+    const q = parseInt(qty, 10);
+    if(!item || !lot || isNaN(q)){ skipped++; skippedLines.push(line); return; }
+
+    const key = norm(item) + '|' + norm(lot);
+    if(pastedMap.has(key)){
+      const entry = pastedMap.get(key);
+      entry.requiredQty += q;
+      entry.productName = product || entry.productName;
+      entry.hits++;
+    } else {
+      pastedMap.set(key, {itemNumber:item, productName:product || '(no name)', lotNumber:lot, requiredQty:q, hits:1});
+      pastedOrder.push(key);
+    }
+  });
+
+  // Second pass: merge the summarized pasted rows into the existing Loading List.
+  const indexMap = new Map();
+  loadingList.forEach((m, idx) => indexMap.set(norm(m.itemNumber) + '|' + norm(m.lotNumber), idx));
+  pastedOrder.forEach(key=>{
+    const entry = pastedMap.get(key);
+    if(entry.hits > 1) combined++;
+    if(indexMap.has(key)){
+      const idx = indexMap.get(key);
+      loadingList[idx].productName = entry.productName || loadingList[idx].productName;
+      loadingList[idx].requiredQty = entry.requiredQty;
+      updated++;
+    } else {
+      loadingList.push({itemNumber:entry.itemNumber, productName:entry.productName, lotNumber:entry.lotNumber, requiredQty:entry.requiredQty});
+      indexMap.set(key, loadingList.length - 1);
+      added++;
+    }
+  });
+
+  document.getElementById('loadingBulkInput').value = '';
+  updateLoadingBulkLineCount();
+  let msg = added + ' row(s) added, ' + updated + ' row(s) updated';
+  if(combined) msg += ' (' + combined + ' item/lot pair(s) had multiple pasted lines summed together)';
+  if(skipped){
+    msg += ', ' + skipped + ' row(s) skipped (missing/invalid data).';
+  } else {
+    msg += '.';
+  }
+  alert(msg);
+  renderAll();
+}
+
+// ---------- LOT NUMBER CONVERSION ----------
+// Two accepted "full lot" formats, both converted down to the same 6-char
+// canonical key (yy + mm + last-2-digits-of-code) so they match a 6-digit
+// GS1 barcode scan of the same physical lot:
+//   1) Plain 10-digit run-on lot:      YYMMDD + 4-digit plant code, e.g. "2608050047"
+//   2) Dashed date + 10-digit code:    YYMMDD-CCCCCCCCCC, e.g. "260518-0092823232"
+function convertLotNumber(fullLot){
+  const raw = (fullLot || '').toString().trim();
+
+  if(/^\d{10}$/.test(raw)){
+    const yy = raw.substr(0, 2);
+    const mm = raw.substr(2, 2);
+    const plant = raw.substr(6, 4);
+    return yy + mm + plant.substr(2, 2);
+  }
+
+  const dashed = raw.replace(/\s+/g, '').match(/^(\d{6})-(\d{10})$/);
+  if(dashed){
+    const yy = dashed[1].substr(0, 2);
+    const mm = dashed[1].substr(2, 2);
+    const code = dashed[2];
+    return yy + mm + code.substr(-2);
+  }
+
+  // 3) Alphanumeric lot: YYMMDD + 3 letters + 5 digits, e.g. "260825DCS10022"
+  //    (26 = year, 08 = month, 25 = day, DCS10022 = plant/batch code, where
+  //    the 3 letters and the numbers can vary). Same canonical key rule as the
+  //    others: yy + mm + last 2 characters of the code.
+  const alpha = raw.replace(/\s+/g, '').match(/^(\d{6})([A-Za-z]{3}\d{5})$/);
+  if(alpha){
+    const yy = alpha[1].substr(0, 2);
+    const mm = alpha[1].substr(2, 2);
+    return yy + mm + alpha[2].substr(-2);
+  }
+
+  return null;
+}
+
+// Normalizes a lot value to a single comparison key regardless of how it was
+// captured: a full 10-digit lot (as stored in the Loading List, or as scanned
+// via QR code, which reproduces the Loading List value exactly) is converted
+// down to the 6-digit code; anything else (e.g. an already 6-digit code read
+// from a barcode) is just normalized as-is. This lets a barcode scan and a QR
+// scan of the *same* physical lot resolve to the same key, so mixed scanning
+// methods on the same shipment match correctly against the Loading List.
+function canonicalLot(lot){
+  return convertLotNumber(lot) || norm(lot);
+}
+
+// ---------- LOT NUMBER FORMAT VALIDATION ----------
+// A value scanned/typed into a Lot Number field must match one of the three
+// accepted lot number formats used on physical labels (plus 4) below):
+//   1) 6-digit export lot:            YYMMCC                 e.g. "260547"
+//   2) 10-digit run-on lot:           YYMMDD + 4-digit code  e.g. "2605030047"
+//   3) Dashed date + 10-digit code:   YYMMDD-CCCCCCCCCC      e.g. "260518-0032523600"
+//   4) Alphanumeric lot:              YYMMDD+3 letters+5 digits e.g. "260825DCS10022"
+// Anything else is rejected. A long all-digit run with no dash (11+ digits,
+// e.g. "00000025622561") is almost always a License Plate / SSCC barcode
+// scanned into the wrong field by mistake, so that case gets its own message.
+function validateLotNumberFormat(raw){
+  const val = (raw || '').toString().trim();
+  if(!val) return {valid:false, reason:'empty'};
+
+  if(/^\d{6}$/.test(val)) return {valid:true};
+  if(/^\d{10}$/.test(val)) return {valid:true};
+  if(/^\d{6}-\d{10}$/.test(val)) return {valid:true};
+  if(/^\d{6}[A-Za-z]{3}\d{5}$/.test(val)) return {valid:true};   // e.g. 260825DCS10022
+
+  const digitsOnly = val.replace(/[\s-]/g, '');
+  if(/^\d+$/.test(digitsOnly) && digitsOnly.length >= 11){
+    return {valid:false, reason:'license_plate'};
+  }
+
+  return {valid:false, reason:'invalid'};
+}
+
+function lotFormatErrorMessage(reason){
+  if(reason === 'license_plate'){
+    return '🚫 This must be a License Plate Number - re-scan the LOT NUMBER.';
+  }
+  return '🚫 Invalid Lot Number - that does not match a recognized Lot Number format. Re-scan the LOT NUMBER.';
+}
+
+function playLotFormatError(reason){
+  playErrorSound(reason === 'license_plate' ? 'LICENSE_PLATE' : 'INVALID_LOT');
+}
+
+function lotsByItemMap(){
+  const map = {};
+  loadingList.forEach(row => {
+    const itemKey = norm(row.itemNumber);
+    const converted = canonicalLot(row.lotNumber);
+    if(!map[itemKey]) map[itemKey] = new Set();
+    map[itemKey].add(converted);
+  });
+  return map;
+}
+
+function isExpectedLotForItem(itemNumber, scannedLot){
+  const lotsByItem = lotsByItemMap();
+  const expected = lotsByItem[norm(itemNumber)];
+  if(!expected || expected.size === 0) return true;
+  return expected.has(canonicalLot(scannedLot));
+}
+
+// Cache of the most recently computed Loading List / Summary / Scan Report
+// rows. renderAll() always runs right after every scan and refreshes these,
+// so when the "Export to Excel" button is pressed, it can reuse them instead
+// of redoing the same computation the screen just did a moment earlier.
+let cachedLoadingRows = null;
+let cachedSummaryRows = null;
+let cachedScanRows = null;
+
+function computeLoadingList(){
+  const groups = new Map();
+  loadingList.forEach((row, idx) => {
+    const groupLotKey = canonicalLot(row.lotNumber);
+    const key = norm(row.itemNumber) + '|' + groupLotKey;
+    if(!groups.has(key)) groups.set(key, []);
+    groups.get(key).push({row, idx});
+  });
+  groups.forEach(list => {
+    list.sort((a, b) => (Number(a.row.lotNumber) || 0) - (Number(b.row.lotNumber) || 0));
+  });
+
+  const scannedByRowIdx = {};
+  const pointerByGroup = {};
+  const lotsByItem = lotsByItemMap();
+  const extraCounts = {};
+
+  scanLog.forEach(s => {
+    const itemKey = norm(s.itemNumber);
+    const lotKey = canonicalLot(s.lotNumber);
+    const groupKey = itemKey + '|' + lotKey;
+    const list = groups.get(groupKey);
+    if(!list || list.length === 0){
+      if(lotsByItem[itemKey]){
+        extraCounts[groupKey] = (extraCounts[groupKey] || 0) + 1;
+      }
+      return;
+    }
+    let ptr = pointerByGroup[groupKey] || 0;
+    while(ptr < list.length - 1 && (scannedByRowIdx[list[ptr].idx] || 0) >= (Number(list[ptr].row.requiredQty) || 0)){
+      ptr++;
+    }
+    pointerByGroup[groupKey] = ptr;
+    const targetIdx = list[ptr].idx;
+    scannedByRowIdx[targetIdx] = (scannedByRowIdx[targetIdx] || 0) + 1;
+  });
+
+  const mainRows = loadingList.map((row, idx) => {
+    let converted = convertLotNumber(row.lotNumber);
+    // Export Shipment: a lot number already given as 6 digits is kept exactly as given.
+    if(!converted && getShipmentType() === 'export' && /^\d{6}$/.test((row.lotNumber || '').toString().trim())){
+      converted = row.lotNumber.toString().trim();
+    }
+    const scanned = scannedByRowIdx[idx] || 0;
+    const exceeded = row.requiredQty > 0 && scanned > row.requiredQty;
+    const met = row.requiredQty > 0 ? scanned >= row.requiredQty : scanned > 0;
+    return {...row, convertedLot: converted || '(unrecognized lot format)', extraLotNumber:'', scannedQty:scanned, met, exceeded, isExtra:false};
+  });
+
+  const extraRows = [];
+  Object.keys(extraCounts).forEach(comboKey => {
+    const sepIdx = comboKey.indexOf('|');
+    const itemKey = comboKey.slice(0, sepIdx);
+    const lotKey = comboKey.slice(sepIdx + 1);
+    const sampleScan = scanLog.find(s => norm(s.itemNumber) === itemKey && canonicalLot(s.lotNumber) === lotKey);
+    extraRows.push({
+      itemNumber: sampleScan ? sampleScan.itemNumber : itemKey,
+      productName: findProductName(itemKey) || (sampleScan && sampleScan.productName) || '(no name)',
+      lotNumber: '',
+      convertedLot: '',
+      extraLotNumber: sampleScan ? sampleScan.lotNumber : lotKey,
+      requiredQty: 0,
+      scannedQty: extraCounts[comboKey],
+      met: false,
+      exceeded: false,
+      isExtra: true
+    });
+  });
+
+  return mainRows.concat(extraRows);
+}
+
+// ---------- SCAN LOGIC ----------
+function findProductName(itemNumber){
+  const loadMatch = loadingList.find(m => norm(m.itemNumber) === norm(itemNumber));
+  if(loadMatch) return loadMatch.productName;
+  const match = masterData.find(m => norm(m.itemNumber) === norm(itemNumber));
+  return match ? match.productName : null;
+}
+
+function isInLoadingList(itemNumber){
+  return loadingList.some(m => norm(m.itemNumber) === norm(itemNumber));
+}
+
+// An item code must exist in the Summary List (Master File) at all before any
+// scan for it can be accepted. This is checked separately from - and before -
+// the Loading List check, since the Loading List is only this shipment's
+// subset of items; an item missing from the Master File entirely is always
+// rejected outright.
+function isInMasterFile(itemNumber){
+  return masterData.some(m => norm(m.itemNumber) === norm(itemNumber));
+}
+
+// Detects the case where a scanner fires the Item Number QR and the Lot
+// Number QR into the SAME field back-to-back (usually because the newline
+// between the two scans got stripped, so they land in the field as one long
+// string). If a valid Master File item number is found as the leading part
+// of the scanned text with extra characters left over afterwards, that is a
+// strong signal two codes were scanned together rather than one real item
+// number that simply doesn't exist.
+function detectConcatenatedItemLot(raw){
+  if(isInMasterFile(raw)) return null; // exact match - a normal, single scan
+  const normRaw = norm(raw);
+  for(const m of masterData){
+    const itemNorm = norm(m.itemNumber);
+    if(itemNorm && normRaw.length > itemNorm.length && normRaw.startsWith(itemNorm)){
+      return m.itemNumber;
+    }
+  }
+  return null;
+}
+
+// ---------- WARNING SOUNDS ----------
+let warnAudioCtx = null;
+function getAudioCtx(){
+  if(!warnAudioCtx){
+    warnAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if(warnAudioCtx.state === 'suspended'){
+    warnAudioCtx.resume();
+  }
+  return warnAudioCtx;
+}
+
+// One error type = one unique sound. Every error type below has its own
+// waveform / pitch / rhythm so the operator can tell them apart by ear.
+// Sounds are queued so two errors raised by the same scan never overlap.
+const ERROR_SOUNDS = {
+  // Every sound runs ~2 seconds, at high volume, in the 400-2500 Hz range
+  // (where speakers and human hearing are most effective).
+  // Item code not in Master File: one long continuous harsh buzz (2.0s)
+  ITEM_NOT_IN_MASTER: {wave:'sawtooth', notes:[{f:350, d:2.0}], vol:0.9},
+  // Item not on the Loading List: 4 loud square beeps (~2.0s)
+  NOT_IN_LOADING_LIST:{wave:'square',   notes:[{f:1000,d:0.4},{f:1000,d:0.4},{f:1000,d:0.4},{f:1000,d:0.4}], gap:0.13, vol:0.9},
+  // Lot number mismatch: high-low "ding-dong" alternating (2.0s)
+  LOT_MISMATCH:       {wave:'triangle', notes:[{f:900,d:0.5},{f:500,d:0.5},{f:900,d:0.5},{f:500,d:0.5}], gap:0, vol:1.0},
+  // Required quantity exceeded: fast two-tone siren (2.0s)
+  EXCEED_QTY:         {wave:'sawtooth', notes:[{f:1400,d:0.25},{f:700,d:0.25},{f:1400,d:0.25},{f:700,d:0.25},{f:1400,d:0.25},{f:700,d:0.25},{f:1400,d:0.25},{f:700,d:0.25}], gap:0, vol:0.9},
+  // Barcode could not be read: 8 rapid very high ticks (~2.0s)
+  UNREADABLE_BARCODE: {wave:'square',   notes:[{f:2200,d:0.16},{f:2200,d:0.16},{f:2200,d:0.16},{f:2200,d:0.16},{f:2200,d:0.16},{f:2200,d:0.16},{f:2200,d:0.16},{f:2200,d:0.16}], gap:0.105, vol:0.85},
+  // License Plate scanned instead of Lot: rising 4-step tone (~2.0s)
+  LICENSE_PLATE:      {wave:'square',   notes:[{f:500,d:0.47},{f:700,d:0.47},{f:900,d:0.47},{f:1100,d:0.47}], gap:0.04, vol:0.9},
+  // Invalid Lot Number format: two long flat beeps (2.0s)
+  INVALID_LOT:        {wave:'square',   notes:[{f:600,d:0.9},{f:600,d:0.9}], gap:0.2, vol:0.9},
+  // Item + Lot scanned into one field: long falling glide (2.0s)
+  ITEM_LOT_MERGED:    {wave:'triangle', notes:[{f:2500,to:400,d:2.0}], vol:1.0},
+  // Invalid Box Qty (manual entry): 4 spaced high pings (~2.0s)
+  INVALID_QTY:        {wave:'sine',     notes:[{f:1800,d:0.2},{f:1800,d:0.2},{f:1800,d:0.2},{f:1800,d:0.2}], gap:0.4, vol:1.0}
+};
+
+let audioBusyUntil = 0;
+function playErrorSound(type){
+  try{
+    const def = ERROR_SOUNDS[type];
+    if(!def) return;
+    const ctx = getAudioCtx();
+    let t = Math.max(ctx.currentTime, audioBusyUntil);
+    const gap = def.gap || 0;
+    def.notes.forEach(n=>{
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = def.wave;
+      osc.frequency.setValueAtTime(n.f, t);
+      if(n.to) osc.frequency.linearRampToValueAtTime(n.to, t + n.d);
+      gain.gain.setValueAtTime(0.0001, t);
+      gain.gain.linearRampToValueAtTime(def.vol, t + 0.01);
+      gain.gain.setValueAtTime(def.vol, t + Math.max(0.01, n.d - 0.02));
+      gain.gain.linearRampToValueAtTime(0.0001, t + n.d);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(t);
+      osc.stop(t + n.d + 0.02);
+      t += n.d + gap;
+    });
+    audioBusyUntil = t + 0.25;
+  } catch(e){}
+}
+
+const barcodeInput = document.getElementById('scanBarcode');
+const itemDisplay = document.getElementById('scanItem');
+const productInput = document.getElementById('scanProduct');
+const lotDisplay = document.getElementById('scanLot');
+const statusBox = document.getElementById('scanStatus');
+const tallyBox = document.getElementById('tallyInfo');
+const exceedBox = document.getElementById('exceedAlert');
+
+const methodBarcodeRadio = document.getElementById('methodBarcode');
+const methodQrRadio = document.getElementById('methodQr');
+const barcodeModeArea = document.getElementById('barcodeModeArea');
+const qrModeArea = document.getElementById('qrModeArea');
+const qrItemInput = document.getElementById('qrItemInput');
+const qrLotInput = document.getElementById('qrLotInput');
+
+function hideExceedAlert(){
+  exceedBox.style.display = 'none';
+  exceedBox.textContent = '';
+}
+
+function showExceedAlert(itemNumber, requiredQty, scannedQty){
+  const excess = scannedQty - requiredQty;
+  exceedBox.style.display = 'block';
+  exceedBox.textContent = `🚨 QUANTITY EXCEEDED - Item ${itemNumber}: Required ${requiredQty}, Scanned ${scannedQty} (exceeded by ${excess} ${excess === 1 ? boxUnitWord(false) : boxUnitWordPlural(false)})`;
+}
+
+function updateTallyInfo(itemNumber){
+  const key = norm(itemNumber);
+  const masterRow = masterData.find(m => norm(m.itemNumber) === key);
+  if(!masterRow){
+    tallyBox.style.display = 'none';
+    return;
+  }
+  const scannedCount = scanLog.filter(s => norm(s.itemNumber) === key).length;
+  const req = masterRow.requiredQty;
+  const exceeded = req > 0 && scannedCount > req;
+  tallyBox.style.display = 'block';
+  tallyBox.className = 'tally-info' + (exceeded ? ' tally-exceed' : '');
+  tallyBox.textContent = `Tally for ${itemNumber} - Required: ${req}  |  Scanned so far: ${scannedCount}  |  Tally (Scanned - Required): ${scannedCount - req}` + (exceeded ? `  ⚠️ EXCEEDED by ${scannedCount - req}` : '');
+}
+
+// ---------- GS1 BARCODE PARSING ----------
+const GS1_LOT_LENGTH = 6;
+const GS_SEPARATOR_RE = /[\x1D\u241D]/;
+
+function parseGS1Barcode(raw){
+  const result = {gtin:'', expiryDate:'', lotNumber:'', itemNumber:''};
+  raw = (raw || '').toString().trim();
+  if(!raw) return result;
+
+  if(raw.indexOf('(') !== -1){
+    const aiRegex = /\((\d{2,4})\)([^\(]*)/g;
+    let m;
+    while((m = aiRegex.exec(raw)) !== null){
+      const ai = m[1];
+      const val = m[2].trim();
+      if(ai === '01') result.gtin = val;
+      else if(ai === '17') result.expiryDate = val;
+      else if(ai === '10') result.lotNumber = val;
+      else if(ai === '92') result.itemNumber = val;
+    }
+    return result;
+  }
+
+  const hasGS = GS_SEPARATOR_RE.test(raw);
+  const clean = raw.replace(/[\x1D\u241D]/g, hasGS ? '\u0000' : '');
+  let pos = 0;
+  function readAI(){
+    const ai = clean.substr(pos, 2);
+    pos += 2;
+    return ai;
+  }
+  function readFixed(len){
+    const v = clean.substr(pos, len);
+    pos += len;
+    return v;
+  }
+  function readVariable(defaultLen){
+    const gsIdx = clean.indexOf('\u0000', pos);
+    if(gsIdx !== -1){
+      const v = clean.substring(pos, gsIdx);
+      pos = gsIdx + 1;
+      return v;
+    }
+    const v = clean.substr(pos, defaultLen);
+    pos += defaultLen;
+    return v;
+  }
+  while(pos < clean.length){
+    if(clean[pos] === '\u0000'){ pos++; continue; }
+    const ai = readAI();
+    if(ai === '01'){
+      result.gtin = readFixed(14);
+    } else if(ai === '17'){
+      result.expiryDate = readFixed(6);
+    } else if(ai === '10'){
+      result.lotNumber = readVariable(GS1_LOT_LENGTH);
+    } else if(ai === '92'){
+      result.itemNumber = clean.substring(pos).replace(/\u0000/g, '');
+      pos = clean.length;
+    } else {
+      break;
+    }
+  }
+  return result;
+}
+
+function isEnterKey(e){
+  return e.key === 'Enter' || e.keyCode === 13 || e.which === 13;
+}
+
+const SCAN_IDLE_MS = 80;
+let barcodeIdleTimer = null;
+let scanInProgress = false;
+
+function processScan(itemNumber, lotNumber, remarks, boxQty){
+  boxQty = Math.max(1, parseInt(boxQty, 10) || 1);
+  itemNumber = (itemNumber || '').toString().trim().toUpperCase();
+  if(!validateShipmentDetails()) return { inLoadingList: false, lotMismatch: false, itemNotFound: false };
+
+  hideExceedAlert();
+
+  // Hard stop: an item code that does not exist anywhere in the Summary List
+  // (Master File) is never accepted - it is not added to the Scan Report at
+  // all, regardless of scan method (Barcode / QR Code / Manual Entry).
+  if(!isInMasterFile(itemNumber)){
+    playErrorSound('ITEM_NOT_IN_MASTER');
+    statusBox.className = 'scan-status stage-item scan-row-alert';
+    statusBox.textContent = '🚫 The Item code not found in the Master File';
+    itemDisplay.value = itemNumber;
+    lotDisplay.value = lotNumber;
+    productInput.value = '';
+    return { inLoadingList: false, lotMismatch: false, itemNotFound: true };
+  }
+
+  const product = findProductName(itemNumber);
+  const inLoadingList = isInLoadingList(itemNumber);
+  const productName = product || 'UNKNOWN (not in master list)';
+
+  itemDisplay.value = itemNumber;
+  lotDisplay.value = lotNumber;
+  productInput.value = productName;
+
+  const lotMismatch = inLoadingList && !isExpectedLotForItem(itemNumber, lotNumber);
+  const nextPrompt = methodQrRadio.checked ? 'Scan the next Item Number' : 'Scan the next barcode';
+
+  if(!inLoadingList){
+    playErrorSound('NOT_IN_LOADING_LIST');
+    statusBox.className = 'scan-status stage-lot scan-row-alert';
+    statusBox.textContent = '⚠️ Item "' + itemNumber + '" is NOT in the Loading List! Scan logged for review - ' + nextPrompt;
+  } else if(lotMismatch){
+    playErrorSound('LOT_MISMATCH');
+    statusBox.className = 'scan-status stage-lot scan-row-alert';
+    statusBox.textContent = '⚠️ Lot Number mismatch - Item "' + itemNumber + '" scanned lot "' + lotNumber + '" is not an expected lot on the Loading List! Scan logged for review - ' + nextPrompt;
+  } else {
+    statusBox.className = 'scan-status stage-item';
+    statusBox.textContent = nextPrompt;
+  }
+
+  // Each scan-report row represents one box, so a Box Qty of N logs N rows.
+  for(let i = 0; i < boxQty; i++){
+    scanLog.push({
+      barcode: '',
+      itemNumber: itemNumber,
+      productName: productName,
+      lotNumber: lotNumber,
+      remarks: remarks || '',
+      timestamp: Date.now()
+    });
+  }
+
+  const key = norm(itemNumber);
+  const masterRow = masterData.find(m => norm(m.itemNumber) === key);
+  let exceededInfo = null;
+  if(masterRow && masterRow.requiredQty > 0){
+    const scannedCount = scanLog.filter(s => norm(s.itemNumber) === key).length;
+    if(scannedCount > masterRow.requiredQty){
+      exceededInfo = {itemNumber: itemNumber, requiredQty: masterRow.requiredQty, scannedQty: scannedCount};
+    }
+  }
+
+  updateTallyInfo(itemNumber);
+  renderAll();
+
+  if(exceededInfo){
+    showExceedAlert(exceededInfo.itemNumber, exceededInfo.requiredQty, exceededInfo.scannedQty);
+    playErrorSound('EXCEED_QTY');
+  }
+
+  return {inLoadingList, lotMismatch};
+}
+
+// ---------- BARCODE SCAN ----------
+function handleBarcodeScan(val){
+  if(scanInProgress) return;
+  clearTimeout(barcodeIdleTimer);
+  val = (val || '').trim();
+  if(!val) return;
+
+  if(!validateShipmentDetails()){
+    barcodeInput.value = '';
+    return;
+  }
+
+  scanInProgress = true;
+  const parsed = parseGS1Barcode(val);
+  parsed.itemNumber = (parsed.itemNumber || '').toString().trim().toUpperCase();
+
+  if(!parsed.itemNumber || !parsed.lotNumber){
+    hideExceedAlert();
+    playErrorSound('UNREADABLE_BARCODE');
+    barcodeInput.classList.add('not-found');
+    statusBox.className = 'scan-status stage-item scan-row-alert';
+    statusBox.textContent = '⚠️ Could not read Item Number / Lot Number from that barcode - please rescan ("' + val + '")';
+    itemDisplay.value = parsed.itemNumber || '';
+    lotDisplay.value = parsed.lotNumber || '';
+    productInput.value = '';
+    scanInProgress = false;
+    barcodeInput.value = '';
+    barcodeInput.focus();
+    return;
+  }
+
+  // Barcode scanning area only: a full 10-digit lot number captured from the
+  // barcode is converted down to the 6-digit code for the Scan Report. QR
+  // Code Scan (handleQrLotScan below) intentionally skips this conversion so
+  // its output matches the Loading List's lot number exactly.
+  const barcodeLot = convertLotNumber(parsed.lotNumber) || parsed.lotNumber;
+
+  const lotCheck = validateLotNumberFormat(barcodeLot);
+  if(!lotCheck.valid){
+    hideExceedAlert();
+    playLotFormatError(lotCheck.reason);
+    barcodeInput.classList.add('not-found');
+    statusBox.className = 'scan-status stage-item scan-row-alert';
+    statusBox.textContent = lotFormatErrorMessage(lotCheck.reason);
+    itemDisplay.value = parsed.itemNumber || '';
+    lotDisplay.value = barcodeLot || '';
+    productInput.value = '';
+    scanInProgress = false;
+    barcodeInput.value = '';
+    barcodeInput.focus();
+    return;
+  }
+
+  const result = processScan(parsed.itemNumber, barcodeLot, '');
+  barcodeInput.classList.toggle('not-found', !result.inLoadingList || result.lotMismatch);
+
+  barcodeInput.value = '';
+  scanInProgress = false;
+  barcodeInput.focus();
+}
+
+barcodeInput.addEventListener('keydown', e=>{
+  if(!isEnterKey(e)) return;
+  e.preventDefault();
+  handleBarcodeScan(barcodeInput.value);
+});
+
+barcodeInput.addEventListener('input', ()=>{
+  if(/[\r\n]/.test(barcodeInput.value)){
+    clearTimeout(barcodeIdleTimer);
+    const val = barcodeInput.value.replace(/[\r\n]+/g,'');
+    barcodeInput.value = val;
+    handleBarcodeScan(val);
+    return;
+  }
+  clearTimeout(barcodeIdleTimer);
+  barcodeIdleTimer = setTimeout(()=>{
+    if(barcodeInput.value.trim()) handleBarcodeScan(barcodeInput.value);
+  }, SCAN_IDLE_MS);
+});
+
+// ---------- QR CODE SCAN ----------
+let qrPendingItem = '';
+let qrItemIdleTimer = null;
+let qrLotIdleTimer = null;
+
+function handleQrItemScan(val){
+  clearTimeout(qrItemIdleTimer);
+  val = (val || '').trim().toUpperCase();
+  if(!val) return;
+
+  if(!validateShipmentDetails()){
+    qrItemInput.value = '';
+    return;
+  }
+
+  hideExceedAlert();
+
+  // Guard: if the Item Number QR and the Lot Number QR were both scanned
+  // into this one field (no separator between them, or a scanner that fires
+  // continuously), reject the merged text outright rather than treating it
+  // as a single (invalid) Item Number.
+  if(detectConcatenatedItemLot(val)){
+    playErrorSound('ITEM_LOT_MERGED');
+    qrItemInput.value = '';
+    qrItemInput.classList.add('not-found');
+    statusBox.className = 'scan-status stage-item scan-row-alert';
+    statusBox.textContent = '⚠️ Item Number and Lot Number were both scanned into the Item Number field! Scan the Item Number QR code only, then scan the Lot Number separately.';
+    qrItemInput.focus();
+    return;
+  }
+
+  // Hard stop: an item code that does not exist in the Summary List (Master
+  // File) is rejected immediately, before the app even asks for a Lot
+  // Number, so nothing is ever added to the Scan Report for it.
+  if(!isInMasterFile(val)){
+    playErrorSound('ITEM_NOT_IN_MASTER');
+    qrItemInput.value = '';
+    qrItemInput.classList.add('not-found');
+    statusBox.className = 'scan-status stage-item scan-row-alert';
+    statusBox.textContent = '🚫 The Item code not found in the Master File';
+    qrItemInput.focus();
+    return;
+  }
+
+  qrPendingItem = val;
+  qrItemInput.value = val;
+  qrItemInput.classList.remove('not-found');
+  qrItemInput.disabled = true;
+  qrLotInput.disabled = false;
+  qrLotInput.value = '';
+  qrLotInput.classList.remove('not-found');
+  statusBox.className = 'scan-status stage-lot';
+  statusBox.textContent = '➡️ Item Number captured - now scan the LOT NUMBER QR code';
+  qrLotInput.focus();
+}
+
+function handleQrLotScan(val){
+  clearTimeout(qrLotIdleTimer);
+  val = (val || '').trim();
+  if(!val || !qrPendingItem) return;
+
+  if(!validateShipmentDetails()){
+    qrLotInput.value = '';
+    return;
+  }
+
+  // Reject anything that is not a recognized Lot Number format BEFORE it can
+  // reach processScan/scanLog. The Item Number stays captured (qrPendingItem
+  // is left untouched) so the operator only has to re-scan the Lot Number.
+  const lotCheck = validateLotNumberFormat(val);
+  if(!lotCheck.valid){
+    hideExceedAlert();
+    playLotFormatError(lotCheck.reason);
+    qrLotInput.value = '';
+    qrLotInput.classList.add('not-found');
+    statusBox.className = 'scan-status stage-lot scan-row-alert';
+    statusBox.textContent = lotFormatErrorMessage(lotCheck.reason);
+    qrLotInput.focus();
+    return;
+  }
+
+  const itemNumber = qrPendingItem;
+  // QR Code Scan intentionally does NOT convert the lot number - it must be
+  // logged exactly as scanned, matching the Loading List's lot number value.
+  const result = processScan(itemNumber, val, '');
+  qrLotInput.classList.toggle('not-found', !result.inLoadingList || result.lotMismatch);
+
+  qrPendingItem = '';
+  qrItemInput.disabled = false;
+  qrItemInput.value = '';
+  setTimeout(()=>{
+    qrLotInput.value = '';
+    qrLotInput.disabled = true;
+    qrLotInput.classList.remove('not-found');
+  }, 600);
+  qrItemInput.focus();
+}
+
+qrItemInput.addEventListener('keydown', e=>{
+  if(!isEnterKey(e)) return;
+  e.preventDefault();
+  handleQrItemScan(qrItemInput.value);
+});
+qrItemInput.addEventListener('input', ()=>{
+  if(/[\r\n]/.test(qrItemInput.value)){
+    clearTimeout(qrItemIdleTimer);
+    const val = qrItemInput.value.replace(/[\r\n]+/g,'');
+    qrItemInput.value = val;
+    handleQrItemScan(val);
+    return;
+  }
+  clearTimeout(qrItemIdleTimer);
+  qrItemIdleTimer = setTimeout(()=>{
+    if(qrItemInput.value.trim()) handleQrItemScan(qrItemInput.value);
+  }, SCAN_IDLE_MS);
+});
+
+qrLotInput.addEventListener('keydown', e=>{
+  if(!isEnterKey(e)) return;
+  e.preventDefault();
+  handleQrLotScan(qrLotInput.value);
+});
+qrLotInput.addEventListener('input', ()=>{
+  if(/[\r\n]/.test(qrLotInput.value)){
+    clearTimeout(qrLotIdleTimer);
+    const val = qrLotInput.value.replace(/[\r\n]+/g,'');
+    qrLotInput.value = val;
+    handleQrLotScan(val);
+    return;
+  }
+  clearTimeout(qrLotIdleTimer);
+  qrLotIdleTimer = setTimeout(()=>{
+    if(qrLotInput.value.trim()) handleQrLotScan(qrLotInput.value);
+  }, SCAN_IDLE_MS);
+});
+
+// ---------- BLOCK COPY / PASTE IN BARCODE & QR SCAN FIELDS ----------
+// Only the dedicated Manual Entry fields (#manualItem / #manualLot) are meant
+// for typed/pasted input; the live scan fields must only receive input from
+// an actual scanner (or manual keystrokes), never a clipboard paste.
+(function(){
+  [barcodeInput, qrItemInput, qrLotInput].forEach(el=>{
+    if(!el) return;
+    ['paste','copy','cut','contextmenu','drop'].forEach(evt=>{
+      el.addEventListener(evt, e=>{
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      });
+    });
+    el.addEventListener('keydown', e=>{
+      const key = (e.key || '').toLowerCase();
+      if((e.ctrlKey || e.metaKey) && (key === 'v' || key === 'c' || key === 'x')){
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      }
+    });
+  });
+})();
+
+// ---------- SCAN METHOD TOGGLE ----------
+function updateScanMethodUI(){
+  const isQr = methodQrRadio.checked;
+  barcodeModeArea.style.display = isQr ? 'none' : 'block';
+  qrModeArea.style.display = isQr ? 'block' : 'none';
+  resetStation();
+  renderLoadingTable();
+}
+methodBarcodeRadio.addEventListener('change', updateScanMethodUI);
+methodQrRadio.addEventListener('change', updateScanMethodUI);
+
+// ---------- SHIPMENT TYPE RESTRICTION ----------
+// Ansell Lanka shipments can only use QR Code Scan in the Scan Station.
+// Export Shipments can use either Barcode Scan or QR Code Scan.
+const methodBarcodeLabelEl = document.getElementById('methodBarcodeLabel');
+const scanMethodLockedNoteEl = document.getElementById('scanMethodLockedNote');
+
+function applyShipmentTypeRestriction(){
+  const type = getShipmentType();
+  if(type === 'ansell'){
+    methodBarcodeLabelEl.style.display = 'none';
+    scanMethodLockedNoteEl.style.display = 'block';
+    if(!methodQrRadio.checked){
+      methodQrRadio.checked = true;
+    }
+  } else {
+    methodBarcodeLabelEl.style.display = 'inline-flex';
+    scanMethodLockedNoteEl.style.display = 'none';
+  }
+  updateScanMethodUI();
+  applyBoxUnitLabels();
+  renderScanTable();
+}
+
+// ---------- MANUAL ENTRY ----------
+function toggleManualEntry(){
+  const el = document.getElementById('manualEntryArea');
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+function handleManualEntry(){
+  if(!validateShipmentDetails()) return;
+
+  const item = document.getElementById('manualItem').value.trim();
+  const lot = document.getElementById('manualLot').value.trim();
+  const userName = userNameInput ? userNameInput.value.trim() : '';
+
+  const qtyEl = document.getElementById('manualBoxQty');
+  const qtyRaw = qtyEl.value.trim();
+
+  if(!item || !lot){
+    alert('Please enter both Item Number and Lot Number.');
+    return;
+  }
+
+  if(!/^\d+$/.test(qtyRaw) || parseInt(qtyRaw, 10) < 1 || parseInt(qtyRaw, 10) > 9999){
+    playErrorSound('INVALID_QTY');
+    qtyEl.classList.add('not-found');
+    statusBox.className = 'scan-status stage-lot scan-row-alert';
+    statusBox.textContent = '🚫 Invalid Box Qty - enter a whole number from 1 to 9999.';
+    qtyEl.focus();
+    return;
+  }
+  qtyEl.classList.remove('not-found');
+  const boxQty = parseInt(qtyRaw, 10);
+
+  const lotCheck = validateLotNumberFormat(lot);
+  if(!lotCheck.valid){
+    playLotFormatError(lotCheck.reason);
+    document.getElementById('manualLot').value = '';
+    document.getElementById('manualLot').classList.add('not-found');
+    statusBox.className = 'scan-status stage-lot scan-row-alert';
+    statusBox.textContent = lotFormatErrorMessage(lotCheck.reason);
+    document.getElementById('manualLot').focus();
+    return;
+  }
+
+  const remark = 'Manually entered by the user (' + userName + ')' + (boxQty > 1 ? ' - Box Qty ' + boxQty : '');
+  processScan(item, lot, remark, boxQty);
+
+  document.getElementById('manualItem').value = '';
+  document.getElementById('manualLot').value = '';
+  qtyEl.value = '1';
+  document.getElementById('manualItem').focus();
+}
+
+function resetStation(){
+  clearTimeout(barcodeIdleTimer);
+  clearTimeout(qrItemIdleTimer);
+  clearTimeout(qrLotIdleTimer);
+  scanInProgress = false;
+
+  barcodeInput.value = '';
+  barcodeInput.classList.remove('not-found');
+
+  qrPendingItem = '';
+  qrItemInput.value = '';
+  qrItemInput.classList.remove('not-found');
+  qrLotInput.value = '';
+  qrLotInput.classList.remove('not-found');
+
+  itemDisplay.value = '';
+  productInput.value = '';
+  lotDisplay.value = '';
+  tallyBox.style.display = 'none';
+
+  checkShipmentDetailsComplete();
+}
+
+function undoLastScan(){
+  if(!validateShipmentDetails()) return;
+  if(scanLog.length === 0) return;
+  scanLog.pop();
+  renderAll();
+}
+
+function clearScanReport(){
+  if(!validateShipmentDetails()) return;
+  if(!confirm('Clear all scanned entries? This cannot be undone.')) return;
+  scanLog = [];
+  renderAll();
+}
+
+function deleteScanRow(idx){
+  if(!validateShipmentDetails()) return;
+  scanLog.splice(idx,1);
+  renderAll();
+}
+
+// ---------- SUMMARY COMPUTATION ----------
+function computeSummary(){
+  const map = new Map();
+  masterData.forEach(m=>{
+    const key = norm(m.itemNumber);
+    if(!map.has(key)){
+      map.set(key, {itemNumber:m.itemNumber, productName:m.productName, requiredQty:Number(m.requiredQty)||0});
+    }
+  });
+  const counts = {};
+  scanLog.forEach(s=>{
+    const key = norm(s.itemNumber);
+    counts[key] = (counts[key]||0) + 1;
+  });
+  const rows = [];
+  map.forEach((v,key)=>{
+    const scanned = counts[key] || 0;
+    const exceeded = v.requiredQty > 0 && scanned > v.requiredQty;
+    const met = v.requiredQty > 0 ? scanned >= v.requiredQty : scanned > 0;
+    const status = exceeded ? 'EXCEED' : (met ? 'MET' : 'PENDING');
+    rows.push({...v, scannedQty:scanned, met, exceeded, status});
+  });
+  return rows;
+}
+
+function isInMaster(itemNumber){
+  return masterData.some(m => norm(m.itemNumber) === norm(itemNumber));
+}
+
+// ---------- RENDERING ----------
+function renderAll(){
+  renderMasterTable();
+  renderLoadingTable();
+  renderScanTable();
+  renderSummaryTable();
+  saveState(); // every change is kept in this browser straight away
+}
+
+function renderMasterTable(){
+  const body = document.getElementById('masterTableBody');
+  document.getElementById('masterCount').textContent = masterData.length + ' rows';
+  if(masterData.length === 0){
+    body.innerHTML = '<tr><td colspan="4" class="empty-msg">No summary data yet. Add rows above or paste in bulk.</td></tr>';
+    return;
+  }
+  body.innerHTML = masterData.map((m,i)=>`
+    <tr>
+      <td>${escapeHtml(m.itemNumber)}</td>
+      <td>${escapeHtml(m.productName)}</td>
+      <td>${m.requiredQty}</td>
+      <td><button class="danger small" onclick="deleteMasterRow(${i})">Delete</button></td>
+    </tr>`).join('');
+}
+
+function renderLoadingTable(){
+  const body = document.getElementById('loadingTableBody');
+  document.getElementById('loadingCount').textContent = loadingList.length + ' rows';
+  const rows = cachedLoadingRows = computeLoadingList();
+
+  // "Scanned Lot Number" only makes sense for Barcode Scan (which converts the
+  // 10-digit lot down to a 6-digit code). When QR Code Scan is selected, the
+  // Scan Report already matches the Loading List's lot number exactly, so
+  // this column is hidden here (and left out of the Excel export too).
+  const isQr = methodQrRadio.checked;
+  const thScannedLot = document.getElementById('thScannedLot');
+  if(thScannedLot){
+    thScannedLot.style.display = isQr ? 'none' : '';
+    thScannedLot.textContent = getShipmentType() === 'export' ? 'Converted Lot Number' : 'Scanned Lot Number';
+  }
+  const totalLabelCell = document.getElementById('loadingTotalLabel');
+  if(totalLabelCell) totalLabelCell.colSpan = isQr ? 4 : 5;
+
+  if(rows.length === 0){
+    body.innerHTML = `<tr><td colspan="${isQr ? 9 : 10}" class="empty-msg">No loading list yet. Add rows above or paste in bulk.</td></tr>`;
+  } else {
+    body.innerHTML = rows.map((r,i)=>{
+      let rowClass, pillClass, statusLabel;
+      if(r.isExtra){
+        rowClass = 'row-extra';
+        pillClass = 'pill-extra';
+        statusLabel = 'EXTRA LOT';
+      } else {
+        rowClass = r.exceeded ? 'row-red' : (r.met ? 'row-green' : 'row-yellow');
+        pillClass = r.exceeded ? 'pill-red' : (r.met ? 'pill-green' : 'pill-yellow');
+        statusLabel = r.exceeded ? 'EXCEED' : (r.met ? 'COMPLETED' : 'PENDING');
+      }
+      const exceededBy = r.exceeded ? (r.scannedQty - r.requiredQty) : '-';
+      const deleteBtn = r.isExtra ? '' : `<button class="danger small" onclick="deleteLoadingRow(${i})">Delete</button>`;
+      const scannedLotCell = isQr ? '' : `<td>${r.convertedLot ? escapeHtml(r.convertedLot) : '-'}</td>`;
+      return `
+      <tr class="${rowClass}">
+        <td>${escapeHtml(r.itemNumber)}</td>
+        <td>${escapeHtml(r.productName)}</td>
+        <td>${r.lotNumber ? escapeHtml(r.lotNumber) : '-'}</td>
+        ${scannedLotCell}
+        <td>${r.extraLotNumber ? escapeHtml(r.extraLotNumber) : '-'}</td>
+        <td>${r.isExtra ? '-' : r.requiredQty}</td>
+        <td>${r.scannedQty}</td>
+        <td>${exceededBy}</td>
+        <td><span class="status-pill ${pillClass}">${statusLabel}</span></td>
+        <td>${deleteBtn}</td>
+      </tr>`;
+    }).join('');
+  }
+  document.getElementById('loadingTotalRequired').textContent = rows.reduce((a,r)=>a+(Number(r.requiredQty)||0),0);
+  document.getElementById('loadingTotalScanned').textContent = rows.reduce((a,r)=>a+r.scannedQty,0);
+}
+
+function renderScanTable(){
+  const body = document.getElementById('scanTableBody');
+  document.getElementById('scanCount').textContent = scanLog.length + ' scans';
+
+  // Lot Number column: only shown in the Scan Report for Export Shipment.
+  // Ansell Lanka shipments keep the Scan Report exactly as before (no Lot
+  // Number column).
+  const isExport = getShipmentType() === 'export';
+  const thScanLot = document.getElementById('thScanLot');
+  if(thScanLot) thScanLot.style.display = isExport ? '' : 'none';
+  const emptyColspan = isExport ? 10 : 9;
+
+  if(scanLog.length === 0){
+    body.innerHTML = `<tr><td colspan="${emptyColspan}" class="empty-msg">No scans yet.</td></tr>`;
+    cachedScanRows = [];
+    return;
+  }
+  const runningCounts = {};
+  cachedScanRows = [];
+  body.innerHTML = scanLog.map((s,i)=>{
+    const notInSummary = !isInMaster(s.itemNumber);
+    const lotMismatch = isInLoadingList(s.itemNumber) && !isExpectedLotForItem(s.itemNumber, s.lotNumber);
+    const key = norm(s.itemNumber);
+    runningCounts[key] = (runningCounts[key] || 0) + 1;
+    const masterRow = masterData.find(m => norm(m.itemNumber) === key);
+    const requiredQty = masterRow ? masterRow.requiredQty : '-';
+    const scannedQty = runningCounts[key];
+    const tally = masterRow ? (scannedQty - masterRow.requiredQty) : '-';
+    const remarks = buildScanRemarks(s, notInSummary, lotMismatch);
+    cachedScanRows.push({scan:s, notInSummary, lotMismatch, requiredQty, scannedQty, tally, remarks});
+    const lotCell = isExport ? `<td>${s.lotNumber ? escapeHtml(s.lotNumber) : '-'}</td>` : '';
+    return `
+    <tr class="${(notInSummary || lotMismatch) ? 'scan-row-alert' : ''}">
+      <td>${i+1}</td>
+      <td>${escapeHtml(s.itemNumber)}${notInSummary ? ' ⚠️ (Not in Summary)' : ''}</td>
+      ${lotCell}
+      <td>${escapeHtml(s.productName)}</td>
+      <td>${requiredQty}</td>
+      <td>${scannedQty}</td>
+      <td>${tally}</td>
+      <td>${new Date(s.timestamp).toLocaleTimeString()}</td>
+      <td>${escapeHtml(remarks)}</td>
+      <td><button class="danger small" onclick="deleteScanRow(${i})">✕</button></td>
+    </tr>`;
+  }).join('');
+  body.parentElement.parentElement.scrollTop = body.parentElement.parentElement.scrollHeight;
+}
+
+function buildScanRemarks(s, notInSummary, lotMismatch){
+  const parts = [];
+  if(s.remarks) parts.push(s.remarks);
+  if(lotMismatch) parts.push('Lot Number mismatch');
+  return parts.length ? parts.join(' | ') : '-';
+}
+
+let summaryFilter = 'all';
+
+function setSummaryFilter(filter){
+  summaryFilter = filter;
+  document.querySelectorAll('#summaryFilterRow .filter-btn').forEach(btn=>{
+    btn.classList.toggle('active', btn.dataset.filter === filter);
+  });
+  renderSummaryTable();
+}
+
+function renderSummaryTable(){
+  const body = document.getElementById('summaryTableBody');
+  const rows = cachedSummaryRows = computeSummary();
+
+  const pendingRows = rows.filter(r=>!r.met && !r.exceeded);
+  const metRows = rows.filter(r=>r.met && !r.exceeded);
+  const exceedRows = rows.filter(r=>r.exceeded);
+
+  document.getElementById('filterCountAll').textContent = '(' + rows.length + ')';
+  document.getElementById('filterCountPending').textContent = '(' + pendingRows.length + ')';
+  document.getElementById('filterCountMet').textContent = '(' + metRows.length + ')';
+  document.getElementById('filterCountExceed').textContent = '(' + exceedRows.length + ')';
+
+  let visibleRows = rows;
+  if(summaryFilter === 'pending') visibleRows = pendingRows;
+  else if(summaryFilter === 'met') visibleRows = metRows;
+  else if(summaryFilter === 'exceed') visibleRows = exceedRows;
+
+  if(rows.length === 0){
+    body.innerHTML = '<tr><td colspan="7" class="empty-msg">Add summary data above to see live scanned quantities.</td></tr>';
+  } else if(visibleRows.length === 0){
+    body.innerHTML = '<tr><td colspan="7" class="empty-msg">No items match this filter.</td></tr>';
+  } else {
+    body.innerHTML = visibleRows.map(r=>{
+      const rowClass = r.exceeded ? 'row-red' : (r.met ? 'row-green' : 'row-yellow');
+      const pillClass = r.exceeded ? 'pill-red' : (r.met ? 'pill-green' : 'pill-yellow');
+      const exceededBy = r.exceeded ? (r.scannedQty - r.requiredQty) : '-';
+      const tally = r.scannedQty - r.requiredQty;
+      return `
+      <tr class="${rowClass}">
+        <td>${escapeHtml(r.itemNumber)}</td>
+        <td>${escapeHtml(r.productName)}</td>
+        <td>${r.requiredQty}</td>
+        <td>${r.scannedQty}</td>
+        <td>${tally}</td>
+        <td>${exceededBy}</td>
+        <td><span class="status-pill ${pillClass}">${r.status}</span></td>
+      </tr>`;
+    }).join('');
+  }
+  const totalScanned = scanLog.length;
+  const totalRequired = rows.reduce((a,r)=>a+r.requiredQty,0);
+  const totalMet = rows.filter(r=>r.met).length;
+  const totalPending = rows.length - totalMet;
+  document.getElementById('totalScannedAll').textContent = totalScanned;
+  document.getElementById('totalRequiredAll').textContent = totalRequired;
+  document.getElementById('totalMet').textContent = totalMet;
+  document.getElementById('totalPending').textContent = totalPending;
+
+  const completionPct = totalRequired > 0 ? Math.min(100, Math.round((totalScanned / totalRequired) * 100)) : 0;
+  document.getElementById('scanReportTotalScanned').textContent = totalScanned;
+  document.getElementById('scanReportCompletionPct').textContent = completionPct + '%';
+
+  checkLoadingComplete(rows.length, pendingRows.length, exceedRows.length);
+}
+
+// ---------- LOADING COMPLETE MODAL ----------
+let loadingCompleteShown = false;
+
+function checkLoadingComplete(allCount, pendingCount, exceedCount){
+  const isComplete = allCount > 0 && pendingCount === 0 && exceedCount === 0;
+  if(isComplete && !loadingCompleteShown){
+    loadingCompleteShown = true;
+    showLoadingCompleteModal();
+  } else if(!isComplete){
+    loadingCompleteShown = false;
+  }
+}
+
+function showLoadingCompleteModal(){
+  const modal = document.getElementById('loadingCompleteModal');
+  const content = document.getElementById('lcModalContent');
+  modal.style.display = 'flex';
+  content.classList.remove('lc-playing');
+  void content.offsetWidth;
+  content.classList.add('lc-playing');
+  clearTimeout(showLoadingCompleteModal._autoCloseTimer);
+  showLoadingCompleteModal._autoCloseTimer = setTimeout(closeLoadingCompleteModal, 11000);
+}
+
+function closeLoadingCompleteModal(){
+  document.getElementById('loadingCompleteModal').style.display = 'none';
+  document.getElementById('lcModalContent').classList.remove('lc-playing');
+  clearTimeout(showLoadingCompleteModal._autoCloseTimer);
+}
+
+function escapeHtml(str){
+  return (str||'').toString().replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+// ---------- EXCEL EXPORT ----------
+// Builds the whole workbook and returns it as a buffer, for the
+// "Export to Excel" button.
+async function buildWorkbookBuffer(){
+  const workbook = new ExcelJS.Workbook();
+  const loadId = loadIdInput.value.trim();
+  const dest = destinationInput.value.trim();
+  const loadingDate = loadingDateInput.value.trim();
+  const userName = userNameInput.value.trim();
+  const employeeNumber = employeeNumberInput.value.trim();
+  const shipmentLine = `Load ID: ${loadId || '-'}    Destination: ${dest || '-'}    Loading Date: ${loadingDate || '-'}    User Name: ${userName || '-'}    Employee Number: ${employeeNumber || '-'}`;
+
+  function prependShipmentInfo(ws, colSpan){
+    ws.spliceRows(1, 0, [shipmentLine], []);
+    ws.mergeCells(1, 1, 1, colSpan);
+    ws.getRow(1).font = {bold:true, italic:true};
+    ws.getRow(3).font = {bold:true};
+    ws.getRow(3).fill = {type:'pattern', pattern:'solid', fgColor:{argb:'FFD9E2F3'}};
+  }
+
+  const wsScan = workbook.addWorksheet('Scan Report');
+  // Lot Number column: only added to the Scan Report for Export Shipment.
+  // Ansell Lanka shipments keep the Scan Report exactly as before (no Lot
+  // Number column).
+  const isExportScan = getShipmentType() === 'export';
+  const scanColumns = [
+    {header:'#', key:'no', width:6},
+    {header:'Item Number', key:'item', width:22}
+  ];
+  if(isExportScan){
+    scanColumns.push({header:'Lot Number', key:'lot', width:18});
+  }
+  scanColumns.push(
+    {header:'Product Name', key:'product', width:55},
+    {header:'Required Qty', key:'req', width:14},
+    {header:'Scanned Qty', key:'scanned', width:14},
+    {header:'Tally (Scanned Qty - Required Qty)', key:'tally', width:20},
+    {header:'Scan Time', key:'time', width:22},
+    {header:'Remarks', key:'remarks', width:40}
+  );
+  wsScan.columns = scanColumns;
+  const scanRows = cachedScanRows || scanLog.map((s,i)=>{
+    const notInSummary = !isInMaster(s.itemNumber);
+    const lotMismatch = isInLoadingList(s.itemNumber) && !isExpectedLotForItem(s.itemNumber, s.lotNumber);
+    const key = norm(s.itemNumber);
+    const masterRow = masterData.find(m => norm(m.itemNumber) === key);
+    return {scan:s, notInSummary, lotMismatch, requiredQty: masterRow ? masterRow.requiredQty : '-', scannedQty: null, tally: null, remarks: buildScanRemarks(s, notInSummary, lotMismatch)};
+  });
+  const scanRunningCounts = {};
+  scanRows.forEach((r,i)=>{
+    const s = r.scan;
+    const key = norm(s.itemNumber);
+    scanRunningCounts[key] = (scanRunningCounts[key] || 0) + 1;
+    const scannedQty = scanRunningCounts[key];
+    const reqQty = r.requiredQty === '-' ? '' : r.requiredQty;
+    const tally = reqQty === '' ? '' : (scannedQty - reqQty);
+    const rowData = {no:i+1, item:s.itemNumber + (r.notInSummary ? ' (NOT IN SUMMARY)' : ''), product:s.productName, req:reqQty, scanned:scannedQty, tally:tally, time:new Date(s.timestamp).toLocaleString(), remarks: r.remarks === '-' ? '' : r.remarks};
+    if(isExportScan){
+      rowData.lot = s.lotNumber || '';
+    }
+    const row = wsScan.addRow(rowData);
+    if(r.notInSummary || r.lotMismatch){
+      row.font = {color:{argb:'FFC0392B'}, bold:true};
+    }
+  });
+  prependShipmentInfo(wsScan, isExportScan ? 9 : 8);
+
+  const wsSum = workbook.addWorksheet('Summary');
+  wsSum.columns = [
+    {header:'Item Number', key:'item', width:22},
+    {header:'Product Name', key:'product', width:55},
+    {header:'Required ' + boxUnitWord(true) + ' Qty', key:'req', width:16},
+    {header:'Scanned ' + boxUnitWord(true) + ' Qty', key:'scanned', width:16},
+    {header:'Tally (Scanned Qty - Required Qty)', key:'tally', width:20},
+    {header:'Exceeded By', key:'exceededBy', width:14},
+    {header:'Status', key:'status', width:14}
+  ];
+  const rows = cachedSummaryRows || computeSummary();
+  rows.forEach(r=>{
+    const row = wsSum.addRow({item:r.itemNumber, product:r.productName, req:r.requiredQty, scanned:r.scannedQty, tally: r.scannedQty - r.requiredQty, exceededBy: r.exceeded ? (r.scannedQty - r.requiredQty) : '', status: r.status});
+    const fillColor = r.exceeded ? 'FFF8D7DA' : (r.met ? 'FFC6EFCE' : 'FFFFF2CC');
+    row.eachCell(cell => {
+      cell.fill = {type:'pattern', pattern:'solid', fgColor:{argb:fillColor}};
+      if(r.exceeded){ cell.font = {color:{argb:'FF842029'}, bold:true}; }
+    });
+  });
+  const totalScanned = scanLog.length;
+  const totalRequired = rows.reduce((a,r)=>a+r.requiredQty,0);
+  wsSum.addRow({});
+  const totalRow = wsSum.addRow({item:'TOTAL', req:totalRequired, scanned:totalScanned});
+  totalRow.font = {bold:true};
+  prependShipmentInfo(wsSum, 7);
+
+  const wsLoad = workbook.addWorksheet('Loading List');
+  // Match the on-screen Loading List: the Scanned Lot Number column only
+  // applies to Barcode Scan and is left out entirely when QR Code Scan is
+  // selected, since QR scans already match the Loading List's lot exactly.
+  const isQrExport = methodQrRadio.checked;
+  const loadColumns = [
+    {header:'Item Number', key:'item', width:22},
+    {header:'Product Name', key:'product', width:55},
+    {header:'Lot Number (Loading List)', key:'lot', width:24}
+  ];
+  if(!isQrExport){
+    loadColumns.push({header: getShipmentType() === 'export' ? 'Converted Lot Number' : 'Scanned Lot Number', key:'scanCode', width:18});
+  }
+  loadColumns.push(
+    {header:'Extra Lot Number', key:'extraLot', width:20},
+    {header:'Required ' + boxUnitWord(true) + ' Qty', key:'req', width:16},
+    {header:'Scanned ' + boxUnitWord(true) + ' Qty', key:'scanned', width:16},
+    {header:'Exceeded By', key:'exceededBy', width:14},
+    {header:'Status', key:'status', width:14}
+  );
+  wsLoad.columns = loadColumns;
+  const loadRows = cachedLoadingRows || computeLoadingList();
+  loadRows.forEach(r=>{
+    const status = r.isExtra ? 'EXTRA LOT' : (r.exceeded ? 'EXCEED' : (r.met ? 'COMPLETED' : 'PENDING'));
+    const rowData = {item:r.itemNumber, product:r.productName, lot:r.lotNumber || '', extraLot:r.extraLotNumber || '', req: r.isExtra ? '' : r.requiredQty, scanned:r.scannedQty, exceededBy: r.exceeded ? (r.scannedQty - r.requiredQty) : '', status};
+    if(!isQrExport){
+      rowData.scanCode = r.convertedLot || '';
+    }
+    const row = wsLoad.addRow(rowData);
+    const fillColor = r.isExtra ? 'FFDFF0FF' : (r.exceeded ? 'FFF8D7DA' : (r.met ? 'FFC6EFCE' : 'FFFFF2CC'));
+    row.eachCell(cell => {
+      cell.fill = {type:'pattern', pattern:'solid', fgColor:{argb:fillColor}};
+      if(r.exceeded){ cell.font = {color:{argb:'FF842029'}, bold:true}; }
+      if(r.isExtra){ cell.font = {color:{argb:'FF12406E'}, bold:true}; }
+    });
+  });
+  wsLoad.addRow({});
+  const loadTotalRow = wsLoad.addRow({item:'TOTAL', req:loadRows.reduce((a,r)=>a+(Number(r.requiredQty)||0),0), scanned:loadRows.reduce((a,r)=>a+r.scannedQty,0)});
+  loadTotalRow.font = {bold:true};
+  prependShipmentInfo(wsLoad, isQrExport ? 8 : 9);
+
+  // ---------- LOCK ALL SHEETS ----------
+  // Protects each worksheet so its cells cannot be edited in Excel without
+  // the password below. Users can still open, view, filter/sort and select
+  // cells to copy - they just can't overwrite the data. Change SHEET_LOCK_PASSWORD
+  // to update the password (used for every sheet).
+  const SHEET_LOCK_PASSWORD = 'ATL-ScanReport-2026';
+  const sheetProtectionOptions = {
+    selectLockedCells: true,
+    selectUnlockedCells: true,
+    formatCells: false,
+    formatColumns: false,
+    formatRows: false,
+    insertRows: false,
+    insertColumns: false,
+    insertHyperlinks: false,
+    deleteRows: false,
+    deleteColumns: false,
+    sort: true,
+    autoFilter: true,
+    pivotTables: false
+  };
+  await wsScan.protect(SHEET_LOCK_PASSWORD, sheetProtectionOptions);
+  await wsSum.protect(SHEET_LOCK_PASSWORD, sheetProtectionOptions);
+  await wsLoad.protect(SHEET_LOCK_PASSWORD, sheetProtectionOptions);
+
+  return await workbook.xlsx.writeBuffer();
+}
+
+async function exportToExcel(){
+  if(exportInProgress) return;                       // ignore double-clicks (they created duplicate/blocked downloads)
+  if(!validateShipmentDetails()) return;
+  if(typeof ExcelJS === 'undefined'){
+    alert('The Excel library (ExcelJS) could not be loaded - check the internet connection / firewall access to cdnjs.cloudflare.com, then reload the page. Your scans are safe (auto-saved).');
+    return;
+  }
+  const btn = document.getElementById('btnDownloadExcel');
+  exportInProgress = true;
+  if(btn){ btn.disabled = true; btn.textContent = '⏳ Preparing Excel...'; }
+  try{
+    const buffer = await buildWorkbookBuffer();
+    const blob = new Blob([buffer], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const stamp = new Date().toISOString().slice(0,19).replace(/[:T]/g,'-');
+    const fileLoadId = sanitizeForFilename(loadIdInput.value.trim());
+    const fileDest = sanitizeForFilename(destinationInput.value.trim());
+    a.href = url;
+    a.download = `${fileLoadId}_${fileDest}_ScanReport_${stamp}.xlsx`;
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    // Do NOT revoke immediately - some browsers have not started reading the blob yet.
+    setTimeout(()=>URL.revokeObjectURL(url), 60000);
+    archiveCurrentSession();   // keep a copy of this shipment once its report is downloaded
+  }catch(err){
+    console.error('Excel export failed:', err);
+    alert('Excel download failed: ' + (err && err.message ? err.message : err) + '\n\nPlease try again. Your scans are safe (auto-saved).');
+  }finally{
+    setTimeout(()=>{
+      exportInProgress = false;
+      if(btn){ btn.disabled = false; btn.textContent = '⬇ Download Excel Report'; }
+    }, 1500);
+  }
+}
+
+// ---------- STARTUP ----------
+(function init(){
+  // Probe storage first, so the operator is warned if it is unavailable.
+  try{
+    localStorage.setItem('__atl_probe__','1');
+    localStorage.removeItem('__atl_probe__');
+  }catch(err){ storageAvailable = false; }
+
+  const saved = storageAvailable ? readSavedState() : null;
+
+  if(saved && snapshotHasContent(saved)){
+    // Nothing is loaded silently: park the state, draw the empty screen behind
+    // the dialog (saving is blocked by restorePending) and ask first.
+    restorePending = true;
+    renderAll();
+    checkShipmentDetailsComplete();
+    openRestoreDialog(saved);
+    setSessionStatus('ok');
+  } else {
+    renderAll();
+    checkShipmentDetailsComplete();
+    setSessionStatus(storageAvailable ? 'ok' : 'failed');
+  }
+
+  if(!storageAvailable) setSessionStatus('failed');
+  updateHeldButton();
+  updateArchiveButton();
+})();
+</script>
+
+<!-- PREVIOUS SHIPMENTS (last 10, from this browser) -->
+<div class="modal-overlay" id="archiveOverlay">
+  <div class="l10-dialog">
+    <h2 style="margin:0 0 6px 0; color:var(--blue-dark);">Previous Shipments (last 10)</h2>
+    <p style="margin:0 0 12px 0; font-size:12px; color:var(--muted);">Saved only in this browser. Click Load to bring a shipment's full scan data back.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Load ID</th><th>Destination</th><th>Loading Date</th><th>Scans</th><th>Saved</th><th></th></tr></thead>
+        <tbody id="archiveBody"></tbody>
+      </table>
+    </div>
+    <div class="btn-row" style="margin-top:14px;"><button onclick="closeArchiveDialog()">Close</button></div>
+  </div>
+</div>
+<div id="l10Toast"></div>
+
+<!-- LOADING COMPLETE MODAL -->
+<div id="loadingCompleteModal" class="lc-modal" style="display:none;">
+  <div class="lc-modal-content" id="lcModalContent">
+    <div class="lc-scene">
+      <div class="lc-box">📦</div>
+      <div class="lc-truck">🚚</div>
+      <div class="lc-ship">🚢</div>
+      <div class="lc-waves">〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜</div>
+    </div>
+    <div class="lc-message">✅ Loading is completed successfully.</div>
+    <button onclick="closeLoadingCompleteModal()">Close</button>
+  </div>
+</div>
+
+<p class="footer-note">Copyright &copy; 2026 - N.L.Thutina Deshan. All rights reserved. This file and its contents may not be copied, reproduced, or distributed without permission.</p>
+
+</body>
+</html>
